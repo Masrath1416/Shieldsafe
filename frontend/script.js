@@ -1,11 +1,17 @@
 // ================= CONFIG =================
-const BASE_URL = "https://womens-safety-backend-oz26.onrender.com"; // Restored Render URL
+const BASE_URL = "https://womens-safety-backend-oz26.onrender.com";
 
 // ================= APP STATE =================
 let isSirenPlaying = false;
 let safetyTimerInterval = null;
 let journeyTimerInterval = null;
 let sirenAudio = document.getElementById("sosSound");
+
+// ================= LIVE MAP STATE =================
+let map = null;
+let userMarker = null;
+let watchId = null;
+let lastSyncTime = 0;
 
 // ================= INITIALIZATION =================
 document.addEventListener("DOMContentLoaded", () => {
@@ -25,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function checkAuthStatus() {
     const token = localStorage.getItem("token");
     const userName = localStorage.getItem("userName");
-    
+
     if (token) {
         if (userName) {
             document.getElementById("userName").innerText = userName;
@@ -52,7 +58,7 @@ function showAuth(type) {
 function toggleAuth(type) {
     const loginForm = document.getElementById("loginForm");
     const signupForm = document.getElementById("signupForm");
-    
+
     if (type === 'login') {
         loginForm.style.display = "block";
         signupForm.style.display = "none";
@@ -73,7 +79,7 @@ function showSection(sectionId) {
     // Hide all sections
     const sections = document.querySelectorAll("section");
     sections.forEach(s => s.classList.remove("active"));
-    
+
     // Show target section
     const target = document.getElementById(sectionId);
     if (target) {
@@ -102,7 +108,8 @@ function showSection(sectionId) {
     });
 
     // Close mobile menu if open
-    document.getElementById("navLinks").classList.remove("active");
+    const navLinksEl = document.getElementById("navLinks");
+    if (navLinksEl) navLinksEl.classList.remove("active");
 }
 
 async function loadActivityHistory() {
@@ -174,22 +181,22 @@ function renderJourneyHistory(data) {
     `).join('');
 }
 
-function switchHistoryTab(type) {
+function switchHistoryTab(tab) {
+    const sosTab = document.getElementById("tabSos");
+    const journeyTab = document.getElementById("tabJourney");
     const sosList = document.getElementById("sosHistory");
     const journeyList = document.getElementById("journeyHistory");
-    const tabSos = document.getElementById("tabSos");
-    const tabJourney = document.getElementById("tabJourney");
 
-    if (type === 'sos') {
+    if (tab === 'sos') {
+        sosTab.classList.add("active");
+        journeyTab.classList.remove("active");
         sosList.style.display = "block";
         journeyList.style.display = "none";
-        tabSos.classList.add("active");
-        tabJourney.classList.remove("active");
     } else {
+        sosTab.classList.remove("active");
+        journeyTab.classList.add("active");
         sosList.style.display = "none";
         journeyList.style.display = "block";
-        tabSos.classList.remove("active");
-        tabJourney.classList.add("active");
     }
 }
 
@@ -233,7 +240,6 @@ async function handleSignup() {
         const data = await res.json();
 
         if (!res.ok) {
-            // Show the specific error from the server if available
             errorDiv.innerText = data.message || data.error || "Signup failed ❌";
             errorDiv.style.display = "block";
             return;
@@ -274,9 +280,9 @@ async function handleLogin() {
 
         localStorage.setItem("token", data.token);
         if (data.user?.name) localStorage.setItem("userName", data.user.name);
-        
+
         document.getElementById("userName").innerText = data.user?.name || "Profile";
-        
+
         showApp();
     } catch (err) {
         console.error("DEBUG INFO (Login):", err);
@@ -317,7 +323,7 @@ async function addContact() {
             alert("Contact added ✅");
             document.getElementById("contactName").value = "";
             document.getElementById("contactPhone").value = "";
-            fetchContacts(); // Refresh the list
+            fetchContacts();
         } else {
             alert("Failed to add contact");
         }
@@ -368,7 +374,7 @@ function renderContactList(contacts) {
 
 async function deleteContact(id) {
     if (!confirm("Are you sure you want to delete this contact?")) return;
-    
+
     const token = localStorage.getItem("token");
     try {
         const res = await fetch(`${BASE_URL}/api/contacts/${id}`, {
@@ -416,48 +422,16 @@ async function triggerSOS() {
     });
 }
 
-let map = null;
-let userMarker = null;
-let watchId = null;
-let lastSyncTime = 0;
-
-function showSection(sectionId) {
-    // Hide all sections
-    const sections = document.querySelectorAll("section");
-    sections.forEach(s => s.classList.remove("active"));
-    
-    // Show target section
-    const target = document.getElementById(sectionId);
-    if (target) {
-        target.classList.add("active");
-    }
-
-    // SPECIAL: Load history if history tab clicked
-    if (sectionId === 'history') {
-        loadActivityHistory();
-    }
-    if (sectionId === 'contacts') {
-        fetchContacts();
-    }
-    if (sectionId === 'location') {
-        initMap();
-    }
-
-    // Update nav links
-}
-
 // ================= LIVE MAP LOGIC =================
 function initMap() {
     if (map) return; // Already initialized
 
-    // Default to a central location if GPS fails initially
-    map = L.map('map').setView([20.5937, 78.9629], 5); 
+    map = L.map('map').setView([20.5937, 78.9629], 5);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    // Initial attempt to find user
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((pos) => {
             const { latitude, longitude } = pos.coords;
@@ -478,16 +452,13 @@ function startLiveTracking() {
     watchId = navigator.geolocation.watchPosition(
         (pos) => {
             const { latitude, longitude } = pos.coords;
-            
-            // Update UI
+
             document.getElementById("lat").innerText = latitude.toFixed(6);
             document.getElementById("lng").innerText = longitude.toFixed(6);
 
-            // Update Map
             updateMapMarker(latitude, longitude);
             map.panTo([latitude, longitude]);
 
-            // Sync to Backend (Throttle: every 10 seconds)
             const now = Date.now();
             if (now - lastSyncTime > 10000) {
                 syncLocationToBackend(latitude, longitude);
@@ -517,7 +488,6 @@ function stopLiveTracking() {
 
 function updateMapMarker(lat, lng) {
     if (!userMarker) {
-        // Create a custom safety icon
         const safetyIcon = L.divIcon({
             className: 'custom-div-icon',
             html: `<div style="background-color: var(--primary); width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px var(--primary-glow);"></div>`,
@@ -586,16 +556,16 @@ function triggerFakeCall() {
 function startSafetyTimer() {
     const mins = document.getElementById("timerMinutes").value;
     let seconds = mins * 60;
-    
+
     document.getElementById("timerControls").style.display = "none";
     document.getElementById("activeTimerControls").style.display = "block";
-    
+
     updateTimerDisplay('timerDisplay', seconds);
-    
+
     safetyTimerInterval = setInterval(() => {
         seconds--;
         updateTimerDisplay('timerDisplay', seconds);
-        
+
         if (seconds <= 0) {
             clearInterval(safetyTimerInterval);
             triggerSOS();
@@ -616,20 +586,20 @@ function checkIn() {
 function startJourney() {
     const dest = document.getElementById("destination").value;
     const mins = document.getElementById("eta").value;
-    
+
     if (!dest) return alert("Please enter destination");
-    
+
     document.getElementById("journeySetup").style.display = "none";
     document.getElementById("journeyActive").style.display = "block";
     document.getElementById("displayDest").innerText = dest;
-    
+
     let seconds = mins * 60;
     updateTimerDisplay('journeyTimerDisplay', seconds);
-    
+
     journeyTimerInterval = setInterval(() => {
         seconds--;
         updateTimerDisplay('journeyTimerDisplay', seconds);
-        
+
         if (seconds <= 0) {
             clearInterval(journeyTimerInterval);
             triggerSOS();
@@ -648,133 +618,6 @@ function completeJourney() {
 function updateTimerDisplay(elementId, totalSeconds) {
     const m = Math.floor(totalSeconds / 60);
     const s = totalSeconds % 60;
-    document.getElementById(elementId).innerText = 
+    document.getElementById(elementId).innerText =
         `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-}
-
-function switchHistoryTab(tab) {
-    const sosTab = document.getElementById("tabSos");
-    const journeyTab = document.getElementById("tabJourney");
-    const sosList = document.getElementById("sosHistory");
-    const journeyList = document.getElementById("journeyHistory");
-
-    if (tab === 'sos') {
-        sosTab.classList.add("active");
-        journeyTab.classList.remove("active");
-        sosList.style.display = "block";
-        journeyList.style.display = "none";
-    } else {
-        sosTab.classList.remove("active");
-        journeyTab.classList.add("active");
-        sosList.style.display = "none";
-        journeyList.style.display = "block";
-    }
-}
-
-// ================= LIVE MAP LOGIC =================
-let map = null;
-let userMarker = null;
-let watchId = null;
-let lastSyncTime = 0;
-
-function initMap() {
-    if (map) return; // Already initialized
-
-    // Default to a central location if GPS fails initially
-    map = L.map('map').setView([20.5937, 78.9629], 5); 
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    // Initial attempt to find user
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((pos) => {
-            const { latitude, longitude } = pos.coords;
-            map.setView([latitude, longitude], 15);
-            updateMapMarker(latitude, longitude);
-        });
-    }
-}
-
-function startLiveTracking() {
-    if (!navigator.geolocation) return alert("Geolocation not supported");
-
-    document.getElementById("startTrackingBtn").style.display = "none";
-    document.getElementById("stopTrackingBtn").style.display = "inline-block";
-    document.getElementById("location").classList.add("tracking-active");
-    document.getElementById("trackingStatus").innerHTML = `<span class="status-dot"></span> Live Tracking Active`;
-
-    watchId = navigator.geolocation.watchPosition(
-        (pos) => {
-            const { latitude, longitude } = pos.coords;
-            
-            // Update UI
-            document.getElementById("lat").innerText = latitude.toFixed(6);
-            document.getElementById("lng").innerText = longitude.toFixed(6);
-
-            // Update Map
-            updateMapMarker(latitude, longitude);
-            map.panTo([latitude, longitude]);
-
-            // Sync to Backend (Throttle: every 10 seconds)
-            const now = Date.now();
-            if (now - lastSyncTime > 10000) {
-                syncLocationToBackend(latitude, longitude);
-                lastSyncTime = now;
-            }
-        },
-        (err) => {
-            console.error("Tracking Error:", err);
-            stopLiveTracking();
-            alert("Location access denied or lost.");
-        },
-        { enableHighAccuracy: true }
-    );
-}
-
-function stopLiveTracking() {
-    if (watchId) {
-        navigator.geolocation.clearWatch(watchId);
-        watchId = null;
-    }
-
-    document.getElementById("startTrackingBtn").style.display = "inline-block";
-    document.getElementById("stopTrackingBtn").style.display = "none";
-    document.getElementById("location").classList.remove("tracking-active");
-    document.getElementById("trackingStatus").innerHTML = `<span class="status-dot"></span> Tracking Inactive`;
-}
-
-function updateMapMarker(lat, lng) {
-    if (!userMarker) {
-        // Create a custom safety icon
-        const safetyIcon = L.divIcon({
-            className: 'custom-div-icon',
-            html: `<div style="background-color: var(--primary); width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px var(--primary-glow);"></div>`,
-            iconSize: [20, 20],
-            iconAnchor: [10, 10]
-        });
-        userMarker = L.marker([lat, lng], { icon: safetyIcon }).addTo(map);
-        userMarker.bindPopup("<b>You are here</b><br>Safety tracking active.").openPopup();
-    } else {
-        userMarker.setLatLng([lat, lng]);
-    }
-}
-
-async function syncLocationToBackend(latitude, longitude) {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    try {
-        await fetch(`${BASE_URL}/api/location`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify({ latitude, longitude })
-        });
-    } catch (err) {
-        console.error("Backend sync failed", err);
-    }
 }
