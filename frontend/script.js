@@ -216,6 +216,11 @@ function showModal(modalId) {
 
 function closeModal(modalId) {
     document.getElementById(modalId).classList.remove("active");
+    
+    // Stop the siren if dismissing the SOS modal
+    if (modalId === 'sosModal') {
+        stopSiren();
+    }
 }
 
 // ================= AUTH LOGIC =================
