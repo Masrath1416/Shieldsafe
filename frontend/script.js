@@ -98,7 +98,7 @@ function showSection(sectionId) {
     }
 
     // Update nav links
-    const navLinks = document.querySelectorAll(".nav-links a");
+    const navLinks = document.querySelectorAll(".nav-item");
     navLinks.forEach(link => {
         if (link.getAttribute("href") === `#${sectionId}`) {
             link.classList.add("active");
