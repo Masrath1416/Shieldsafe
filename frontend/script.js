@@ -235,6 +235,8 @@ async function handleSignup() {
         return;
     }
 
+    alert("Creating account... please wait ⏳");
+
     try {
         const res = await fetch(`${BASE_URL}/api/auth/signup`, {
             method: "POST",
