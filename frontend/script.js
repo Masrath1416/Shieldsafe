@@ -1,9 +1,8 @@
 // ================= CONFIG =================
-const BASE_URL = "https://womens-safety-backend-oz26.onrender.com";
+const BASE_URL = "http://localhost:5000"; // Changed for local testing
 
 // ================= APP STATE =================
 let isSirenPlaying = false;
-let safetyTimerInterval = null;
 let journeyTimerInterval = null;
 let sirenAudio = document.getElementById("sosSound");
 
@@ -96,9 +95,12 @@ function showSection(sectionId) {
     if (sectionId === 'location') {
         initMap();
     }
+    if (sectionId === 'safetytips') {
+        renderTips('all');
+    }
 
     // Update nav links
-    const navLinks = document.querySelectorAll(".nav-item");
+    const navLinks = document.querySelectorAll(".nav-links a");
     navLinks.forEach(link => {
         if (link.getAttribute("href") === `#${sectionId}`) {
             link.classList.add("active");
@@ -146,18 +148,19 @@ function renderSosHistory(data) {
     }
 
     container.innerHTML = data.map(item => `
-        <div class="history-item">
-            <div class="history-icon sos"><i class="fas fa-bell"></i></div>
-            <div class="history-info">
-                <h4>Emergency Alert Triggered</h4>
+        <div class="list-item">
+            <div class="feature-icon-wrapper" style="width: 40px; height: 40px; color: var(--danger); border-color: rgba(239, 68, 68, 0.2);"><i data-lucide="bell-ring"></i></div>
+            <div class="item-info" style="flex: 1; margin: 0 1rem;">
+                <h4 style="color: var(--danger);">Emergency Alert Triggered</h4>
                 <p>${new Date(item.alertTime).toLocaleString()}</p>
-                <span class="status-badge ${item.status.toLowerCase()}">${item.status}</span>
+                <span style="font-size: 0.8rem; padding: 0.2rem 0.5rem; border-radius: 1rem; background: rgba(255,255,255,0.1);">${item.status}</span>
             </div>
-            <div class="history-action">
-                <a href="https://maps.google.com/?q=${item.latitude},${item.longitude}" target="_blank">View Map</a>
+            <div>
+                <a href="https://maps.google.com/?q=${item.latitude},${item.longitude}" target="_blank" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 50%;"><i data-lucide="map"></i></a>
             </div>
         </div>
     `).join('');
+    if (window.lucide) lucide.createIcons();
 }
 
 function renderJourneyHistory(data) {
@@ -170,15 +173,16 @@ function renderJourneyHistory(data) {
     }
 
     container.innerHTML = data.map(item => `
-        <div class="history-item">
-            <div class="history-icon journey"><i class="fas fa-route"></i></div>
-            <div class="history-info">
+        <div class="list-item">
+            <div class="feature-icon-wrapper" style="width: 40px; height: 40px;"><i data-lucide="route"></i></div>
+            <div class="item-info" style="flex: 1; margin: 0 1rem;">
                 <h4>Trip to ${item.destination}</h4>
                 <p>${new Date(item.startedAt).toLocaleString()}</p>
-                <span class="status-badge ${item.status.toLowerCase()}">${item.status}</span>
+                <span style="font-size: 0.8rem; padding: 0.2rem 0.5rem; border-radius: 1rem; background: rgba(255,255,255,0.1);">${item.status}</span>
             </div>
         </div>
     `).join('');
+    if (window.lucide) lucide.createIcons();
 }
 
 function switchHistoryTab(tab) {
@@ -234,6 +238,7 @@ async function handleSignup() {
         alert("Please enter email & password");
         return;
     }
+    if (!navigator.onLine) return alert("No internet connection! ❌");
 
     alert("Creating account... please wait ⏳");
 
@@ -269,6 +274,7 @@ async function handleLogin() {
         alert("Please enter email & password");
         return;
     }
+    if (!navigator.onLine) return alert("No internet connection! ❌");
 
     try {
         const res = await fetch(`${BASE_URL}/api/auth/login`, {
@@ -364,19 +370,20 @@ function renderContactList(contacts) {
     }
 
     container.innerHTML = contacts.map(c => `
-        <div class="contact-card">
-            <div class="contact-info">
-                <div class="contact-avatar">${c.contactName.charAt(0)}</div>
-                <div>
+        <div class="list-item">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div class="profile-avatar">${c.contactName.charAt(0)}</div>
+                <div class="item-info">
                     <h4>${c.contactName}</h4>
                     <p>${c.contactPhone}</p>
                 </div>
             </div>
             <button class="delete-btn" onclick="deleteContact('${c.id}')">
-                <i class="fas fa-trash"></i>
+                <i data-lucide="trash-2"></i>
             </button>
         </div>
     `).join('');
+    if (window.lucide) lucide.createIcons();
 }
 
 async function deleteContact(id) {
@@ -398,16 +405,23 @@ async function deleteContact(id) {
 
 // ================= SOS & LOCATION =================
 async function triggerSOS() {
+    if (!navigator.onLine) return alert("No internet connection! ❌");
     const token = localStorage.getItem("token");
     if (!token) return alert("Please login first");
 
     if (!navigator.geolocation) return alert("Geolocation not supported");
 
-    showModal('sosModal');
-    playSiren();
+    const sosBtn = document.getElementById("sosTrigger");
+    if (sosBtn) {
+        sosBtn.innerText = "Sending...";
+        sosBtn.style.opacity = "0.7";
+        sosBtn.style.pointerEvents = "none";
+    }
 
     navigator.geolocation.getCurrentPosition(async (pos) => {
         const { latitude, longitude } = pos.coords;
+        showModal('sosModal');
+        playSiren();
         document.getElementById("alertLocation").innerText = `Location: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
 
         try {
@@ -420,12 +434,37 @@ async function triggerSOS() {
                 body: JSON.stringify({ latitude, longitude }),
             });
             const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Failed to trigger SOS");
             console.log("SOS Triggered Successfully:", data);
+            
+            // Show detailed Twilio error if the dispatch failed
+            if (data.alertsDispatch) {
+                const failedAlerts = data.alertsDispatch.filter(a => a.status.startsWith("FAILED"));
+                if (failedAlerts.length > 0) {
+                    alert(`SOS Triggered, but SMS failed: ${failedAlerts[0].status} ❌`);
+                }
+            }
+
         } catch (err) {
             console.error("SOS Alert failed to send to server", err);
+            alert("Failed to reach server. Call emergency numbers manually! ❌");
+        } finally {
+            if (sosBtn) {
+                sosBtn.innerText = "SOS";
+                sosBtn.style.opacity = "1";
+                sosBtn.style.pointerEvents = "auto";
+            }
         }
-    }, () => {
-        alert("Could not get location, but SOS alert triggered locally!");
+    }, (err) => {
+        console.error("GPS Error:", err);
+        alert("Location access denied! SOS triggered without GPS. ❌");
+        if (sosBtn) {
+            sosBtn.innerText = "SOS";
+            sosBtn.style.opacity = "1";
+            sosBtn.style.pointerEvents = "auto";
+        }
+        showModal('sosModal');
+        playSiren();
     });
 }
 
@@ -475,9 +514,9 @@ function startLiveTracking() {
         (err) => {
             console.error("Tracking Error:", err);
             stopLiveTracking();
-            alert("Location access denied or lost.");
+            alert("Location access denied or lost. ❌");
         },
-        { enableHighAccuracy: true }
+        { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
     );
 }
 
@@ -559,37 +598,7 @@ function triggerFakeCall() {
     }, 5000);
 }
 
-// ================= SAFETY TIMER =================
-function startSafetyTimer() {
-    const mins = document.getElementById("timerMinutes").value;
-    let seconds = mins * 60;
-
-    document.getElementById("timerControls").style.display = "none";
-    document.getElementById("activeTimerControls").style.display = "block";
-
-    updateTimerDisplay('timerDisplay', seconds);
-
-    safetyTimerInterval = setInterval(() => {
-        seconds--;
-        updateTimerDisplay('timerDisplay', seconds);
-
-        if (seconds <= 0) {
-            clearInterval(safetyTimerInterval);
-            triggerSOS();
-            alert("Timer expired! SOS Triggered.");
-        }
-    }, 1000);
-}
-
-function checkIn() {
-    clearInterval(safetyTimerInterval);
-    document.getElementById("timerControls").style.display = "block";
-    document.getElementById("activeTimerControls").style.display = "none";
-    document.getElementById("timerDisplay").innerText = "00:00";
-    alert("Glad you're safe! Timer stopped.");
-}
-
-// ================= JOURNEY MODE =================
+// ================= SAFETRIP TRACKER =================
 function startJourney() {
     const dest = document.getElementById("destination").value;
     const mins = document.getElementById("eta").value;
@@ -618,7 +627,7 @@ function completeJourney() {
     clearInterval(journeyTimerInterval);
     document.getElementById("journeySetup").style.display = "block";
     document.getElementById("journeyActive").style.display = "none";
-    alert("Journey completed! Glad you reached safely.");
+    alert("SafeTrip completed! Glad you reached safely.");
 }
 
 // ================= HELPERS =================
@@ -628,3 +637,86 @@ function updateTimerDisplay(elementId, totalSeconds) {
     document.getElementById(elementId).innerText =
         `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
+
+// ================= SAFETY TIPS =================
+const safetyTips = [
+    { category: 'outdoor', icon: 'eye', color: 'var(--primary)', title: 'Stay Aware of Your Surroundings', tip: 'Keep your head up and avoid looking at your phone while walking in unfamiliar areas. Confident, aware body language deters attackers.' },
+    { category: 'outdoor', icon: 'ear', color: 'var(--primary)', title: 'Limit Headphone Use at Night', tip: 'Avoid wearing both earphones while walking alone at night. You need your hearing to detect approaching threats.' },
+    { category: 'outdoor', icon: 'footprints', color: 'var(--primary)', title: 'Walk in Well-Lit Areas', tip: 'Always prefer busy, well-lit streets over shortcuts through dark alleys or parks, even if it takes longer.' },
+    { category: 'outdoor', icon: 'users', color: 'var(--primary)', title: 'Trust Your Instincts', tip: 'If a person or situation makes you feel uneasy, leave immediately. Your instincts are a powerful safety tool.' },
+    { category: 'digital', icon: 'lock', color: '#a855f7', title: 'Use Strong, Unique Passwords', tip: 'Use a password manager to generate and store unique passwords for every account. Never reuse passwords across sites.' },
+    { category: 'digital', icon: 'wifi-off', color: '#a855f7', title: 'Avoid Public Wi-Fi for Sensitive Tasks', tip: 'Never log into banking or sensitive apps on public Wi-Fi. Use your mobile data or a trusted VPN instead.' },
+    { category: 'digital', icon: 'map-pin-off', color: '#a855f7', title: 'Be Careful with Location Sharing', tip: 'Do not post real-time locations on social media. Wait until you have left a location before sharing it publicly.' },
+    { category: 'digital', icon: 'user-x', color: '#a855f7', title: 'Guard Your Personal Information', tip: 'Do not share your home address, daily schedule, or workplace details with people you have only met online.' },
+    { category: 'home', icon: 'door-closed', color: '#3b82f6', title: 'Lock Doors and Windows', tip: 'Develop a habit of locking your door immediately after entering your home, even during the day.' },
+    { category: 'home', icon: 'bell-ring', color: '#3b82f6', title: 'Install a Doorbell Camera', tip: 'A smart video doorbell lets you see and speak to visitors without opening the door, even when you are not home.' },
+    { category: 'home', icon: 'phone', color: '#3b82f6', title: 'Keep Your Phone Charged', tip: 'Always keep your phone above 20% battery when at home alone. A dead phone in an emergency is a serious risk.' },
+    { category: 'home', icon: 'share-2', color: '#3b82f6', title: 'Share Your Plans with Someone', tip: 'Tell a trusted family member or friend where you are going and when you expect to be back, especially at night.' },
+    { category: 'travel', icon: 'car', color: '#10b981', title: 'Verify Ride Details Before Entering', tip: 'Always confirm the car number, driver name, and photo match the app before getting into any cab or ride-share.' },
+    { category: 'travel', icon: 'map', color: '#10b981', title: 'Pre-plan Your Route', tip: 'Research your destination before you travel. Download offline maps so you can navigate without relying on mobile data.' },
+    { category: 'travel', icon: 'bag-check', color: '#10b981', title: 'Keep Valuables Hidden', tip: 'Use anti-theft bags and keep wallets and phones in inner pockets. Avoid displaying expensive items in public.' },
+    { category: 'travel', icon: 'hotel', color: '#10b981', title: 'Choose Safe Accommodation', tip: 'Research hotels or hostels in advance. Ask for a room above the ground floor for added security.' },
+];
+
+function renderTips(filter = 'all') {
+    const grid = document.getElementById('tipsGrid');
+    if (!grid) return;
+    const filtered = filter === 'all' ? safetyTips : safetyTips.filter(t => t.category === filter);
+    grid.innerHTML = filtered.map(t => `
+        <div class="card" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; transition: transform 0.2s;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div class="feature-icon-wrapper" style="width: 40px; height: 40px; min-width:40px; color: ${t.color}; border-color: ${t.color}33;">
+                    <i data-lucide="${t.icon}"></i>
+                </div>
+                <h4 style="font-size: 1rem; line-height: 1.3;">${t.title}</h4>
+            </div>
+            <p class="text-muted" style="font-size: 0.9rem; line-height: 1.6;">${t.tip}</p>
+        </div>
+    `).join('');
+    if (window.lucide) lucide.createIcons();
+}
+
+function filterTips(category) {
+    // Update button styles
+    const tabMap = { all: 'tipTabAll', outdoor: 'tipTabOutdoor', digital: 'tipTabDigital', home: 'tipTabHome', travel: 'tipTabTravel' };
+    Object.keys(tabMap).forEach(k => {
+        const btn = document.getElementById(tabMap[k]);
+        if (btn) { btn.className = k === category ? 'btn btn-primary' : 'btn btn-secondary'; }
+    });
+    renderTips(category);
+}
+
+// ================= TOAST NOTIFICATIONS =================
+
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    let icon = 'info';
+    if(type === 'success' || message.includes('✅')) icon = 'check-circle';
+    if(type === 'error' || type === 'danger' || message.includes('❌')) icon = 'alert-circle';
+    
+    toast.innerHTML = `<i data-lucide="${icon}"></i> <span>${message.replace(/[✅❌]/g, '').trim()}</span>`;
+    container.appendChild(toast);
+    
+    if (window.lucide) lucide.createIcons();
+    
+    setTimeout(() => toast.classList.add('show'), 10);
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
+// Override default alert for a premium feel
+window.alert = function(message) {
+    if(message.toLowerCase().includes('fail') || message.toLowerCase().includes('error') || message.includes('❌')) {
+        showToast(message, 'error');
+    } else {
+        showToast(message, 'success');
+    }
+};

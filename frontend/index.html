@@ -2,514 +2,491 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ShieldSafe - Premium Women Safety App</title>
-    <!-- Google Fonts: Inter & Outfit -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShieldSafe - Premium Women Safety</title>
+    <!-- Modern Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    <meta name="theme-color" content="#ef4444">
+    <meta name="theme-color" content="#070709">
 </head>
 <body>
     <!-- Splash Screen -->
     <div id="splashScreen">
-        <div class="splash-content">
-            <div class="logo-icon-large"><i class="fas fa-shield-heart"></i></div>
-            <div class="logo-text-large animate-splash">ShieldSafe</div>
-            <div class="splash-loader"></div>
+        <div class="splash-logo">
+            <i data-lucide="shield-alert"></i> ShieldSafe
         </div>
     </div>
 
     <!-- Welcome Section -->
-    <div id="welcomeSection" class="view-section">
-        <div class="welcome-container">
-            <div class="welcome-header">
-                <i class="fas fa-shield-heart hero-icon"></i>
-                <h1 class="logo-title">ShieldSafe</h1>
-                <p class="tagline">Your Safety, Our Ultimate Priority</p>
-            </div>
-            
-            <div class="welcome-graphics">
-                <div class="glowing-orb"></div>
-                <img src="https://illustrations.popsy.co/amber/app-launch.svg" alt="Safety App" class="hero-img" style="filter: hue-rotate(330deg) drop-shadow(0 0 20px rgba(239,68,68,0.3)); max-width: 250px; opacity: 0.9;">
-            </div>
-            
-            <div class="welcome-actions">
-                <button class="btn btn-primary btn-block btn-lg" onclick="showAuth('signup')">
-                    Create Account <i class="fas fa-arrow-right"></i>
-                </button>
-                <button class="btn btn-secondary btn-block btn-lg" onclick="showAuth('login')">
-                    Log In
-                </button>
-            </div>
-            <p class="trust-badge"><i class="fas fa-lock"></i> End-to-end encrypted alerts</p>
+    <div id="welcomeSection" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; padding: 2rem;">
+        <div style="margin-bottom: 2rem;">
+            <i data-lucide="shield-check" style="width: 80px; height: 80px; color: var(--primary);"></i>
+        </div>
+        <h1>Your Safety, <br><span class="text-gradient">Our Priority.</span></h1>
+        <p class="text-muted" style="max-width: 400px; margin: 1rem auto 3rem;">
+            Empowering women with instant emergency alerts, real-time tracking, and proactive safety tools.
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 320px;">
+            <button class="btn btn-primary btn-block" onclick="showAuth('signup')">
+                <i data-lucide="user-plus"></i> Create Account
+            </button>
+            <button class="btn btn-secondary btn-block" onclick="showAuth('login')">
+                Already have an account? Login
+            </button>
         </div>
     </div>
 
     <!-- Auth Section -->
-    <div id="authSection" class="view-section" style="display: none;">
-        <div class="auth-container">
-            <button class="back-btn" onclick="showWelcome()"><i class="fas fa-arrow-left"></i></button>
+    <div id="authSection" style="display: none; min-height: 100vh; align-items: center; justify-content: center; padding: 2rem;">
+        <div class="card" style="width: 100%; max-width: 420px; padding: 3rem 2rem;">
+            <div style="text-align: center; margin-bottom: 2.5rem;">
+                <i data-lucide="shield" style="width: 48px; height: 48px; color: var(--primary); margin-bottom: 1rem;"></i>
+                <h2>ShieldSafe</h2>
+            </div>
             
-            <div class="auth-card">
-                <div class="auth-header">
-                    <i class="fas fa-shield-heart auth-icon"></i>
-                    <h2>ShieldSafe</h2>
+            <div id="loginForm">
+                <h3 style="margin-bottom: 0.5rem;">Welcome Back</h3>
+                <p class="text-muted" style="margin-bottom: 2rem; font-size: 0.95rem;">Enter your credentials to access your safety dashboard.</p>
+                
+                <div class="form-group">
+                    <input type="email" id="loginEmail" class="form-input" placeholder=" ">
+                    <label class="form-label">Email Address</label>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="loginPassword" class="form-input" placeholder=" ">
+                    <label class="form-label">Password</label>
                 </div>
                 
-                <!-- Login Form -->
-                <div id="loginForm">
-                    <h3>Welcome Back</h3>
-                    <p class="sub-text">Enter your details to securely access your account.</p>
-                    
-                    <div class="input-group">
-                        <i class="fas fa-envelope input-icon"></i>
-                        <input type="email" id="loginEmail" placeholder="Email Address" class="modern-input">
-                    </div>
-                    <div class="input-group">
-                        <i class="fas fa-lock input-icon"></i>
-                        <input type="password" id="loginPassword" placeholder="Password" class="modern-input">
-                    </div>
-                    
-                    <div id="loginError" class="auth-error" style="display: none;"></div>
-                    
-                    <button class="btn btn-primary btn-block btn-lg" onclick="handleLogin()">Sign In</button>
-                    
-                    <div class="divider"><span>OR</span></div>
-                    
-                    <button class="btn btn-google btn-block" onclick="handleGoogleAuth()">
-                        <img src="https://cdn-icons-png.flaticon.com/512/300/300221.png" alt="Google" width="20"> Continue with Google
-                    </button>
-                    
-                    <p class="switch-auth">New to ShieldSafe? <a href="#" onclick="toggleAuth('signup')">Create an account</a></p>
+                <div id="loginError" style="color: var(--danger); font-size: 0.85rem; margin-bottom: 1rem; display: none;"></div>
+                
+                <button class="btn btn-primary btn-block" onclick="handleLogin()">Sign In</button>
+                <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem;">
+                    <span class="text-muted">Don't have an account?</span> 
+                    <a href="#" onclick="toggleAuth('signup')" style="color: var(--primary); text-decoration: none; font-weight: 500;">Sign Up</a>
                 </div>
+            </div>
 
-                <!-- Signup Form -->
-                <div id="signupForm" style="display: none;">
-                    <h3>Create Account</h3>
-                    <p class="sub-text">Join thousands of women staying protected.</p>
-                    
-                    <div class="input-group">
-                        <i class="fas fa-user input-icon"></i>
-                        <input type="text" id="signupName" placeholder="Full Name" class="modern-input">
-                    </div>
-                    <div class="input-group">
-                        <i class="fas fa-envelope input-icon"></i>
-                        <input type="email" id="signupEmail" placeholder="Email Address" class="modern-input">
-                    </div>
-                    <div class="input-group">
-                        <i class="fas fa-lock input-icon"></i>
-                        <input type="password" id="signupPassword" placeholder="Create Password" class="modern-input">
-                    </div>
-                    
-                    <div id="signupError" class="auth-error" style="display: none;"></div>
-                    
-                    <button class="btn btn-primary btn-block btn-lg" onclick="handleSignup()">Sign Up</button>
-                    
-                    <div class="divider"><span>OR</span></div>
-                    
-                    <button class="btn btn-google btn-block" onclick="handleGoogleAuth()">
-                        <img src="https://cdn-icons-png.flaticon.com/512/300/300221.png" alt="Google" width="20"> Continue with Google
-                    </button>
-                    
-                    <p class="switch-auth">Already have an account? <a href="#" onclick="toggleAuth('login')">Log in</a></p>
+            <div id="signupForm" style="display: none;">
+                <h3 style="margin-bottom: 0.5rem;">Create Account</h3>
+                <p class="text-muted" style="margin-bottom: 2rem; font-size: 0.95rem;">Join us to stay protected anywhere.</p>
+                
+                <div class="form-group">
+                    <input type="text" id="signupName" class="form-input" placeholder=" ">
+                    <label class="form-label">Full Name</label>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="signupEmail" class="form-input" placeholder=" ">
+                    <label class="form-label">Email Address</label>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="signupPassword" class="form-input" placeholder=" ">
+                    <label class="form-label">Password</label>
+                </div>
+                
+                <div id="signupError" style="color: var(--danger); font-size: 0.85rem; margin-bottom: 1rem; display: none;"></div>
+                
+                <button class="btn btn-primary btn-block" onclick="handleSignup()">Create Account</button>
+                <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem;">
+                    <span class="text-muted">Already have an account?</span> 
+                    <a href="#" onclick="toggleAuth('login')" style="color: var(--primary); text-decoration: none; font-weight: 500;">Sign In</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Main App Content (Initially Hidden) -->
+    <!-- Main App Content -->
     <div id="appContent" style="display: none;">
         
-        <!-- Top App Bar -->
-        <header class="top-bar">
-            <div class="top-bar-left">
-                <i class="fas fa-shield-heart text-primary text-xl"></i>
-                <span class="app-title">ShieldSafe</span>
+        <!-- Glassmorphism Navbar -->
+        <nav>
+            <div class="logo">
+                <i data-lucide="shield"></i> ShieldSafe
             </div>
-            <div class="top-bar-right">
-                <div class="profile-menu">
-                    <div class="profile-trigger" onclick="toggleProfileMenu()">
-                        <div class="avatar-sm" id="userAvatar">U</div>
-                        <span id="userName" class="fw-600">Profile</span>
-                        <i class="fas fa-chevron-down text-xs"></i>
-                    </div>
-                    <div class="profile-dropdown" id="profileDropdown">
-                        <div class="dropdown-header">My Account</div>
-                        <a href="#" onclick="showSection('contacts')"><i class="fas fa-user-friends"></i> Contacts</a>
-                        <a href="#" onclick="showSection('history')"><i class="fas fa-history"></i> Activity Log</a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" onclick="handleLogout()" class="text-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
-                    </div>
+            
+            <div class="nav-links" id="navLinks">
+                <a href="#home" class="nav-item active" onclick="showSection('home')">Dashboard</a>
+                <a href="#location" class="nav-item" onclick="showSection('location')">Live Map</a>
+                <a href="#journey" class="nav-item" onclick="showSection('journey')">SafeTrip</a>
+                <a href="#contacts" class="nav-item" onclick="showSection('contacts')">Contacts</a>
+                <a href="#history" class="nav-item" onclick="showSection('history')">Activity</a>
+                <a href="#safetytips" class="nav-item" onclick="showSection('safetytips')">Safety Tips</a>
+                <a href="#howitworks" class="nav-item" onclick="showSection('howitworks')">Guide</a>
+            </div>
+
+            <div class="nav-actions">
+                <div class="profile-trigger" onclick="handleLogout()" title="Logout">
+                    <div class="profile-avatar"><i data-lucide="user" style="width: 16px; height: 16px;"></i></div>
+                    <span id="userName" style="font-size: 0.85rem; font-weight: 600;">Profile</span>
+                    <i data-lucide="log-out" style="width: 16px; height: 16px; color: var(--text-secondary);"></i>
                 </div>
             </div>
-        </header>
+        </nav>
 
-        <!-- Main Content Area -->
-        <main class="main-container">
-
-            <!-- HOME SECTION -->
-            <section id="home" class="active view-section">
+        <div class="container">
+            <!-- Home / Dashboard Section -->
+            <section id="home" class="active">
+                <div style="text-align: center;">
+                    <h2>Safety <span class="text-gradient">Dashboard</span></h2>
+                    <p class="text-muted">Quick access to emergency triggers and proactive tools.</p>
+                </div>
                 
-                <!-- Massive SOS Button Area -->
-                <div class="sos-hero-section">
-                    <div class="sos-ring sos-ring-1"></div>
-                    <div class="sos-ring sos-ring-2"></div>
-                    <button class="premium-sos-btn" id="sosTrigger" onclick="triggerSOS()">
-                        <span class="sos-text">SOS</span>
-                        <i class="fas fa-fingerprint text-xl opacity-50 mt-2"></i>
-                    </button>
-                    <p class="sos-helper-text">Tap instantly in an emergency</p>
+                <div class="sos-hero">
+                    <div class="sos-wrapper">
+                        <div class="sos-pulse-ring"></div>
+                        <div class="sos-pulse-ring"></div>
+                        <button class="sos-btn-main" id="sosTrigger" onclick="triggerSOS()">SOS</button>
+                    </div>
+                    <p class="text-muted" style="font-size: 0.9rem;"><i data-lucide="info" style="width: 14px; height: 14px; vertical-align: middle;"></i> Tap instantly in an emergency to alert contacts.</p>
                 </div>
 
-                <div class="section-title mt-4">
-                    <h3>Safety Tools</h3>
-                    <span>Quick access</span>
-                </div>
-
-                <!-- Modern Tools Grid -->
-                <div class="tools-grid">
-                    <!-- Tool cards using grid -->
-                    <div class="tool-card primary" onclick="showSection('location')">
-                        <div class="tool-icon"><i class="fas fa-map-marker-alt"></i></div>
-                        <h4>Live Tracking</h4>
-                        <p>Share your GPS</p>
+                <div class="grid-features">
+                    <div class="card feature-card" onclick="showSection('location')">
+                        <div class="feature-icon-wrapper"><i data-lucide="map-pin"></i></div>
+                        <div>
+                            <h3>Live Tracking</h3>
+                            <p class="text-muted" style="font-size: 0.9rem;">Share real-time GPS coordinates with your trusted network.</p>
+                        </div>
                     </div>
-                    
-                    <div class="tool-card accent" onclick="showSection('journey')">
-                        <div class="tool-icon"><i class="fas fa-route"></i></div>
-                        <h4>Journey Mode</h4>
-                        <p>Safe trip monitor</p>
+                    <div class="card feature-card" onclick="showSection('journey')">
+                        <div class="feature-icon-wrapper"><i data-lucide="route"></i></div>
+                        <div>
+                            <h3>SafeTrip Tracker</h3>
+                            <p class="text-muted" style="font-size: 0.9rem;">Proactive trip monitoring with automatic alerts if delayed.</p>
+                        </div>
                     </div>
-                    
-                    <div class="tool-card dark" onclick="toggleSiren()">
-                        <div class="tool-icon text-danger"><i class="fas fa-volume-up"></i></div>
-                        <h4>Loud Siren</h4>
-                        <p>Attract attention</p>
+                    <div class="card feature-card" onclick="showSection('helplines')">
+                        <div class="feature-icon-wrapper" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);"><i data-lucide="phone-call"></i></div>
+                        <div>
+                            <h3>Quick-Dial Helplines</h3>
+                            <p class="text-muted" style="font-size: 0.9rem;">Instant one-tap access to emergency response numbers.</p>
+                        </div>
                     </div>
-                    
-                    <div class="tool-card dark" onclick="showSection('fake-call')">
-                        <div class="tool-icon text-info"><i class="fas fa-phone-alt"></i></div>
-                        <h4>Fake Call</h4>
-                        <p>Escape situations</p>
+                    <div class="card feature-card" onclick="toggleSiren()">
+                        <div class="feature-icon-wrapper" style="color: var(--danger);"><i data-lucide="volume-2"></i></div>
+                        <div>
+                            <h3>Loud Siren</h3>
+                            <p class="text-muted" style="font-size: 0.9rem;">Play a high-decibel alarm to attract immediate attention.</p>
+                        </div>
                     </div>
-                    
-                    <div class="tool-card dark" onclick="showSection('timer')">
-                        <div class="tool-icon text-warning"><i class="fas fa-clock"></i></div>
-                        <h4>Safety Timer</h4>
-                        <p>Auto-SOS alert</p>
+                    <div class="card feature-card" onclick="showSection('fake-call')">
+                        <div class="feature-icon-wrapper" style="color: var(--success);"><i data-lucide="phone-incoming"></i></div>
+                        <div>
+                            <h3>Fake Call</h3>
+                            <p class="text-muted" style="font-size: 0.9rem;">Simulate an incoming phone call to exit uncomfortable situations.</p>
+                        </div>
                     </div>
-                    
-                    <div class="tool-card dark" onclick="showSection('tips')">
-                        <div class="tool-icon text-success"><i class="fas fa-lightbulb"></i></div>
-                        <h4>Safety Tips</h4>
-                        <p>Stay prepared</p>
+                    <div class="card feature-card" onclick="showSection('contacts')">
+                        <div class="feature-icon-wrapper"><i data-lucide="users"></i></div>
+                        <div>
+                            <h3>Emergency Contacts</h3>
+                            <p class="text-muted" style="font-size: 0.9rem;">Manage the people who receive your distress signals.</p>
+                        </div>
+                    </div>
+                    <div class="card feature-card" onclick="showSection('safetytips')">
+                        <div class="feature-icon-wrapper" style="color: #a855f7; border-color: rgba(168, 85, 247, 0.2);"><i data-lucide="lightbulb"></i></div>
+                        <div>
+                            <h3>Safety Tips</h3>
+                            <p class="text-muted" style="font-size: 0.9rem;">Expert advice to stay aware, prepared, and protected.</p>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- LOCATION SECTION -->
-            <section id="location" class="view-section">
-                <div class="page-header">
-                    <h2>Live Tracking</h2>
-                    <p>Share real-time coordinates with your trusted contacts.</p>
+            <!-- Location Section -->
+            <section id="location">
+                <div style="margin-bottom: 2rem;">
+                    <h2>Live <span class="text-gradient">Map</span></h2>
+                    <p class="text-muted">Monitor your position and share telemetry.</p>
                 </div>
                 
-                <div class="premium-card">
+                <div class="card">
                     <div class="map-wrapper">
                         <div id="map"></div>
-                        <div class="map-overlay-stats">
-                            <div class="coord-pill">
-                                <i class="fas fa-compass text-primary"></i>
-                                <div>
-                                    <span class="coord-label">LATITUDE</span>
-                                    <span id="lat" class="coord-val">--</span>
-                                </div>
+                        <div style="position: absolute; bottom: 1rem; left: 1rem; z-index: 1000; background: rgba(7,7,9,0.85); backdrop-filter: blur(8px); padding: 0.75rem 1rem; border-radius: 1rem; border: 1px solid var(--border-subtle); display: flex; gap: 1.5rem;">
+                            <div>
+                                <div style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase;">Latitude</div>
+                                <div id="lat" style="font-family: monospace; font-weight: 600; color: var(--primary);">--</div>
                             </div>
-                            <div class="coord-pill">
-                                <i class="fas fa-crosshairs text-info"></i>
-                                <div>
-                                    <span class="coord-label">LONGITUDE</span>
-                                    <span id="lng" class="coord-val">--</span>
-                                </div>
+                            <div>
+                                <div style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase;">Longitude</div>
+                                <div id="lng" style="font-family: monospace; font-weight: 600; color: var(--primary);">--</div>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="p-4 flex-col gap-3">
-                        <div id="trackingStatus" class="status-indicator">
-                            <div class="indicator-dot"></div> Tracking Inactive
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div id="trackingStatus">
+                            <span style="color: var(--text-secondary);"><i data-lucide="satellite" style="width: 16px; height: 16px; vertical-align: middle;"></i> Offline</span>
                         </div>
-                        <button id="startTrackingBtn" class="btn btn-primary btn-block btn-lg" onclick="startLiveTracking()">
-                            <i class="fas fa-play"></i> Start Live Tracking
-                        </button>
-                        <button id="stopTrackingBtn" class="btn btn-danger btn-block btn-lg" onclick="stopLiveTracking()" style="display: none;">
-                            <i class="fas fa-stop"></i> Stop Tracking
-                        </button>
+                        <div style="display: flex; gap: 1rem;">
+                            <button id="startTrackingBtn" class="btn btn-primary" onclick="startLiveTracking()">Start Streaming</button>
+                            <button id="stopTrackingBtn" class="btn btn-secondary" onclick="stopLiveTracking()" style="display: none;">Stop Streaming</button>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- JOURNEY SECTION -->
-            <section id="journey" class="view-section">
-                <div class="page-header">
-                    <h2>Journey Mode</h2>
-                    <p>We'll monitor your trip and alert contacts if you don't arrive safely.</p>
+            <!-- Contacts Section -->
+            <section id="contacts">
+                <div style="margin-bottom: 2rem;">
+                    <h2>Emergency <span class="text-gradient">Contacts</span></h2>
+                    <p class="text-muted">Manage your trusted response network.</p>
                 </div>
                 
-                <div class="premium-card p-4">
-                    <div id="journeySetup">
-                        <div class="icon-header-large text-info"><i class="fas fa-route"></i></div>
-                        <h3 class="text-center mb-4">Start a Safe Trip</h3>
-                        
-                        <div class="input-group mb-3">
-                            <i class="fas fa-map-pin input-icon"></i>
-                            <input type="text" id="destination" placeholder="Destination (e.g. Home, Office)" class="modern-input">
+                <div class="card" style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1.5rem; font-size: 1.1rem;">Add New Contact</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem; align-items: end;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <input type="text" id="contactName" class="form-input" placeholder=" ">
+                            <label class="form-label">Contact Name</label>
                         </div>
-                        <div class="input-group mb-4">
-                            <i class="fas fa-hourglass-half input-icon"></i>
-                            <input type="number" id="eta" placeholder="Estimated Time (Minutes)" value="30" min="5" class="modern-input">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <input type="tel" id="contactPhone" class="form-input" placeholder=" ">
+                            <label class="form-label">Phone Number</label>
                         </div>
-                        <button class="btn btn-info btn-block btn-lg" onclick="startJourney()">Begin Journey</button>
-                    </div>
-
-                    <div id="journeyActive" style="display: none; text-align: center;">
-                        <div class="active-radar">
-                            <div class="radar-wave"></div>
-                            <i class="fas fa-location-arrow radar-icon text-info"></i>
-                        </div>
-                        
-                        <h3 class="mt-4 mb-1">On the move</h3>
-                        <p class="text-muted mb-4">Heading to: <strong id="displayDest" class="text-white"></strong></p>
-                        
-                        <div class="digital-timer text-info" id="journeyTimerDisplay">00:00</div>
-                        
-                        <button class="btn btn-success btn-block btn-lg mt-4" onclick="completeJourney()">
-                            <i class="fas fa-check-circle"></i> I've Reached Safely
+                        <button class="btn btn-primary" onclick="addContact()">
+                            <i data-lucide="plus"></i> Add
                         </button>
                     </div>
                 </div>
-            </section>
 
-            <!-- CONTACTS SECTION -->
-            <section id="contacts" class="view-section">
-                <div class="page-header">
-                    <h2>Emergency Contacts</h2>
-                    <p>These contacts will receive SMS alerts when you trigger SOS.</p>
-                </div>
-                
-                <div class="premium-card p-4 mb-4">
-                    <h3 class="mb-3 text-sm fw-600 text-muted">ADD NEW CONTACT</h3>
-                    <div class="input-group mb-3">
-                        <i class="fas fa-user input-icon"></i>
-                        <input type="text" id="contactName" placeholder="Contact Name" class="modern-input">
-                    </div>
-                    <div class="input-group mb-3">
-                        <i class="fas fa-phone input-icon"></i>
-                        <input type="tel" id="contactPhone" placeholder="Phone Number" class="modern-input">
-                    </div>
-                    <button class="btn btn-primary btn-block" onclick="addContact()"><i class="fas fa-plus"></i> Add Contact</button>
-                </div>
-
-                <h3 class="mb-3 text-sm fw-600 text-muted">SAVED CONTACTS</h3>
-                <div id="contactList" class="flex-col gap-3">
+                <div id="contactList">
                     <!-- Contacts injected here -->
                 </div>
             </section>
 
-            <!-- HISTORY SECTION -->
-            <section id="history" class="view-section">
-                <div class="page-header">
-                    <h2>Activity Log</h2>
-                    <p>History of your SOS alerts and safe journeys.</p>
+            <!-- SafeTrip Tracker -->
+            <section id="journey">
+                <div style="margin-bottom: 2rem;">
+                    <h2>SafeTrip <span class="text-gradient">Tracker</span></h2>
+                    <p class="text-muted">Proactive trip monitoring.</p>
                 </div>
                 
-                <div class="modern-tabs mb-4">
-                    <button class="tab-btn active" id="tabSos" onclick="switchHistoryTab('sos')">SOS Alerts</button>
-                    <button class="tab-btn" id="tabJourney" onclick="switchHistoryTab('journeys')">Journeys</button>
-                </div>
-
-                <div id="sosHistory" class="flex-col gap-3">
-                    <!-- SOS injected here -->
-                </div>
-
-                <div id="journeyHistory" class="flex-col gap-3" style="display: none;">
-                    <!-- Journeys injected here -->
-                </div>
-            </section>
-
-            <!-- TIMER SECTION -->
-            <section id="timer" class="view-section">
-                <div class="page-header">
-                    <h2>Safety Timer</h2>
-                    <p>If you don't check in before the timer ends, SOS is triggered automatically.</p>
-                </div>
-                
-                <div class="premium-card p-4 text-center">
-                    <div class="icon-header-large text-warning"><i class="fas fa-stopwatch"></i></div>
-                    
-                    <div class="digital-timer text-warning my-4" id="timerDisplay">00:00</div>
-                    
-                    <div id="timerControls">
-                        <div class="input-group mb-4">
-                            <i class="fas fa-clock input-icon"></i>
-                            <input type="number" id="timerMinutes" value="10" min="1" max="120" class="modern-input" placeholder="Minutes">
+                <div class="card" style="max-width: 500px; margin: 0 auto; text-align: center;">
+                    <div id="journeySetup">
+                        <i data-lucide="navigation" style="width: 48px; height: 48px; color: var(--primary); margin-bottom: 1.5rem;"></i>
+                        <div class="form-group">
+                            <input type="text" id="destination" class="form-input" placeholder=" ">
+                            <label class="form-label">Destination Address</label>
                         </div>
-                        <button class="btn btn-warning btn-block btn-lg" onclick="startSafetyTimer()">Start Timer</button>
+                        <div class="form-group">
+                            <input type="number" id="eta" class="form-input" value="30" min="5" placeholder=" ">
+                            <label class="form-label">ETA (Minutes)</label>
+                        </div>
+                        <button class="btn btn-primary btn-block" onclick="startJourney()">Start Tracking Trip</button>
                     </div>
-                    
-                    <div id="activeTimerControls" style="display: none;">
-                        <p class="text-muted mb-4">Check in to confirm you are safe and stop the countdown.</p>
-                        <button class="btn btn-success btn-block btn-lg" onclick="checkIn()"><i class="fas fa-check"></i> I'm Safe (Check In)</button>
+
+                    <div id="journeyActive" style="display: none;">
+                        <div class="live-indicator" style="margin-bottom: 1.5rem;">
+                            <div class="live-dot"></div> Tracking Active
+                        </div>
+                        <p class="text-muted">Heading to: <span id="displayDest" style="color: white; font-weight: 600;"></span></p>
+                        
+                        <div class="digital-display" id="journeyTimerDisplay">00:00</div>
+                        
+                        <button class="btn btn-primary btn-block" style="background: var(--success);" onclick="completeJourney()">
+                            <i data-lucide="check-circle"></i> I Reached Safely
+                        </button>
                     </div>
                 </div>
             </section>
 
-            <!-- FAKE CALL SECTION -->
-            <section id="fake-call" class="view-section">
-                <div class="page-header">
-                    <h2>Fake Call</h2>
-                    <p>Simulate an incoming phone call to politely exit uncomfortable situations.</p>
+            <!-- Quick-Dial Helplines Section -->
+            <section id="helplines">
+                <div style="margin-bottom: 2rem;">
+                    <h2>Quick-Dial <span class="text-gradient">Helplines</span></h2>
+                    <p class="text-muted">One-tap connection to emergency services.</p>
                 </div>
                 
-                <div class="premium-card p-4 text-center">
-                    <div class="icon-header-large text-success"><i class="fas fa-mobile-alt"></i></div>
-                    <h3 class="mb-2">Incoming Call Simulator</h3>
-                    <p class="text-muted mb-4">The screen will mimic a realistic incoming phone call exactly 5 seconds after you tap the button.</p>
-                    
-                    <button class="btn btn-success btn-block btn-lg" onclick="triggerFakeCall()">
-                        <i class="fas fa-phone-volume"></i> Schedule Fake Call
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    <a href="tel:112" class="card" style="text-decoration: none; text-align: center; display: block;">
+                        <i data-lucide="shield-alert" style="width: 48px; height: 48px; color: var(--primary); margin-bottom: 1rem;"></i>
+                        <h3 style="color: var(--text-primary);">National Emergency</h3>
+                        <p class="digital-display" style="font-size: 2.5rem; margin: 0.5rem 0;">112</p>
+                        <p class="text-muted">Police, Fire, Ambulance</p>
+                    </a>
+                    <a href="tel:1091" class="card" style="text-decoration: none; text-align: center; display: block;">
+                        <i data-lucide="users" style="width: 48px; height: 48px; color: #ec4899; margin-bottom: 1rem;"></i>
+                        <h3 style="color: var(--text-primary);">Women's Helpline</h3>
+                        <p class="digital-display" style="font-size: 2.5rem; margin: 0.5rem 0; color: #ec4899; text-shadow: 0 0 20px rgba(236,72,153,0.3);">1091</p>
+                        <p class="text-muted">Domestic Abuse & Safety</p>
+                    </a>
+                    <a href="tel:108" class="card" style="text-decoration: none; text-align: center; display: block;">
+                        <i data-lucide="heart-pulse" style="width: 48px; height: 48px; color: var(--success); margin-bottom: 1rem;"></i>
+                        <h3 style="color: var(--text-primary);">Medical / Ambulance</h3>
+                        <p class="digital-display" style="font-size: 2.5rem; margin: 0.5rem 0; color: var(--success); text-shadow: 0 0 20px rgba(16,185,129,0.3);">108</p>
+                        <p class="text-muted">Immediate Medical Help</p>
+                    </a>
+                    <a href="tel:1930" class="card" style="text-decoration: none; text-align: center; display: block;">
+                        <i data-lucide="monitor-off" style="width: 48px; height: 48px; color: #3b82f6; margin-bottom: 1rem;"></i>
+                        <h3 style="color: var(--text-primary);">Cyber Crime</h3>
+                        <p class="digital-display" style="font-size: 2.5rem; margin: 0.5rem 0; color: #3b82f6; text-shadow: 0 0 20px rgba(59,130,246,0.3);">1930</p>
+                        <p class="text-muted">Report Digital Harassment</p>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Fake Call Section -->
+            <section id="fake-call">
+                <div style="margin-bottom: 2rem;">
+                    <h2>Fake <span class="text-gradient">Call</span></h2>
+                    <p class="text-muted">Simulate an incoming call.</p>
+                </div>
+                
+                <div class="card" style="max-width: 400px; margin: 0 auto; text-align: center;">
+                    <i data-lucide="phone-incoming" style="width: 48px; height: 48px; color: var(--success); margin-bottom: 1.5rem;"></i>
+                    <p class="text-muted" style="margin-bottom: 2rem;">Click below to schedule a realistic incoming phone call screen in exactly 5 seconds.</p>
+                    <button class="btn btn-primary btn-block" onclick="triggerFakeCall()">
+                        Schedule Fake Call
                     </button>
                 </div>
             </section>
 
-            <!-- TIPS SECTION -->
-            <section id="tips" class="view-section">
-                <div class="page-header">
-                    <h2>Safety Tips</h2>
-                    <p>Best practices for personal security and situational awareness.</p>
+            <!-- Activity History Section -->
+            <section id="history">
+                <div style="margin-bottom: 2rem;">
+                    <h2>Activity <span class="text-gradient">Log</span></h2>
+                    <p class="text-muted">Review your safety audit trail.</p>
                 </div>
                 
-                <div class="flex-col gap-3">
-                    <div class="tip-card-modern">
-                        <div class="tip-icon"><i class="fas fa-eye"></i></div>
-                        <div class="tip-content">
-                            <h4>Stay Aware</h4>
-                            <p>Always be aware of your surroundings, especially in isolated areas or at night. Avoid distractions like heavy phone usage.</p>
+                <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                    <button class="btn btn-secondary active" id="tabSos" onclick="switchHistoryTab('sos')" style="flex: 1;">SOS Alerts</button>
+                    <button class="btn btn-secondary" id="tabJourney" onclick="switchHistoryTab('journeys')" style="flex: 1;">SafeTrips</button>
+                </div>
+
+                <div id="sosHistory"></div>
+                <div id="journeyHistory" style="display: none;"></div>
+            </section>
+
+            <!-- Safety Tips Section -->
+            <section id="safetytips">
+                <div style="margin-bottom: 2rem;">
+                    <h2>Safety <span class="text-gradient">Tips</span></h2>
+                    <p class="text-muted">Expert advice to keep you aware, prepared, and protected.</p>
+                </div>
+
+                <!-- Filter Tabs -->
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 2rem;">
+                    <button class="btn btn-primary" id="tipTabAll" onclick="filterTips('all')" style="font-size: 0.85rem; padding: 0.5rem 1.25rem;">All</button>
+                    <button class="btn btn-secondary" id="tipTabOutdoor" onclick="filterTips('outdoor')" style="font-size: 0.85rem; padding: 0.5rem 1.25rem;">Outdoor</button>
+                    <button class="btn btn-secondary" id="tipTabDigital" onclick="filterTips('digital')" style="font-size: 0.85rem; padding: 0.5rem 1.25rem;">Digital Safety</button>
+                    <button class="btn btn-secondary" id="tipTabHome" onclick="filterTips('home')" style="font-size: 0.85rem; padding: 0.5rem 1.25rem;">At Home</button>
+                    <button class="btn btn-secondary" id="tipTabTravel" onclick="filterTips('travel')" style="font-size: 0.85rem; padding: 0.5rem 1.25rem;">Travel</button>
+                </div>
+
+                <div id="tipsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem;">
+                    <!-- Tips injected by JS -->
+                </div>
+            </section>
+
+            <!-- How it Works Section -->
+            <section id="howitworks">
+                <div style="margin-bottom: 2rem;">
+                    <h2>How it <span class="text-gradient">Works</span></h2>
+                    <p class="text-muted">A quick guide to your safety features.</p>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div class="card" style="padding: 1.5rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                            <div class="feature-icon-wrapper" style="width: 40px; height: 40px;"><i data-lucide="shield-alert"></i></div>
+                            <h3 style="color: var(--text-primary); font-size: 1.2rem;">SOS Dispatch</h3>
                         </div>
+                        <p class="text-muted" style="font-size: 0.95rem;">Tapping the central glowing SOS button instantly alerts your Emergency Contacts and broadcasts your real-time GPS location. A loud, continuous siren will also play to attract attention.</p>
                     </div>
-                    <div class="tip-card-modern">
-                        <div class="tip-icon"><i class="fas fa-brain"></i></div>
-                        <div class="tip-content">
-                            <h4>Trust Your Instincts</h4>
-                            <p>If a situation or person feels "off", don't hesitate to leave or call for help immediately.</p>
+
+                    <div class="card" style="padding: 1.5rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                            <div class="feature-icon-wrapper" style="width: 40px; height: 40px;"><i data-lucide="route"></i></div>
+                            <h3 style="color: var(--text-primary); font-size: 1.2rem;">SafeTrip Tracker</h3>
                         </div>
+                        <p class="text-muted" style="font-size: 0.95rem;">Heading somewhere alone? Enter your destination and estimated time of arrival (ETA). If you do not click "I Reached Safely" before the timer expires, the app will automatically trigger an SOS to your contacts.</p>
                     </div>
-                    <div class="tip-card-modern">
-                        <div class="tip-icon"><i class="fas fa-battery-full"></i></div>
-                        <div class="tip-content">
-                            <h4>Keep Phone Charged</h4>
-                            <p>Ensure your mobile device always has enough battery and credit before heading out.</p>
+
+                    <div class="card" style="padding: 1.5rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                            <div class="feature-icon-wrapper" style="width: 40px; height: 40px;"><i data-lucide="map-pin"></i></div>
+                            <h3 style="color: var(--text-primary); font-size: 1.2rem;">Live Tracking</h3>
                         </div>
+                        <p class="text-muted" style="font-size: 0.95rem;">Manually start broadcasting your live GPS location to your trusted network. Your marker on the map will continuously update as you move.</p>
                     </div>
-                    <div class="tip-card-modern">
-                        <div class="tip-icon"><i class="fas fa-share-alt"></i></div>
-                        <div class="tip-content">
-                            <h4>Share Trip Details</h4>
-                            <p>Always inform a trusted person about your route, transport details, and expected arrival time.</p>
+
+                    <div class="card" style="padding: 1.5rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                            <div class="feature-icon-wrapper" style="width: 40px; height: 40px;"><i data-lucide="phone-incoming"></i></div>
+                            <h3 style="color: var(--text-primary); font-size: 1.2rem;">Fake Call</h3>
                         </div>
+                        <p class="text-muted" style="font-size: 0.95rem;">Need an excuse to leave an uncomfortable situation? Tap this to schedule a realistic incoming phone call screen in exactly 5 seconds.</p>
+                    </div>
+
+                    <div class="card" style="padding: 1.5rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                            <div class="feature-icon-wrapper" style="width: 40px; height: 40px;"><i data-lucide="phone-call"></i></div>
+                            <h3 style="color: var(--text-primary); font-size: 1.2rem;">Quick-Dial Helplines</h3>
+                        </div>
+                        <p class="text-muted" style="font-size: 0.95rem;">Instant, one-tap buttons that immediately open your phone's dialer with official emergency numbers (Police, Ambulance, Women's Helpline).</p>
                     </div>
                 </div>
             </section>
 
-            <!-- Spacer for bottom nav -->
-            <div style="height: 100px;"></div>
-        </main>
+        </div>
+    </div>
 
-        <!-- Bottom Navigation Bar (Mobile Style) -->
-        <nav class="bottom-nav" id="navLinks">
-            <a href="#home" class="nav-item active" onclick="showSection('home')">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </a>
-            <a href="#location" class="nav-item" onclick="showSection('location')">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>Location</span>
-            </a>
-            <a href="#journey" class="nav-item" onclick="showSection('journey')">
-                <i class="fas fa-route"></i>
-                <span>Journey</span>
-            </a>
-            <a href="#contacts" class="nav-item" onclick="showSection('contacts')">
-                <i class="fas fa-users"></i>
-                <span>Contacts</span>
-            </a>
-            <a href="#history" class="nav-item" onclick="showSection('history')">
-                <i class="fas fa-history"></i>
-                <span>Log</span>
-            </a>
-        </nav>
+    <!-- Modals -->
+    <!-- SOS Alert Modal (Urgent/Shaking) -->
+    <div class="modal-overlay modal-emergency" id="sosModal">
+        <div class="modal-content">
+            <i data-lucide="triangle-alert" class="flashing-icon"></i>
+            <h2 style="color: var(--danger); margin-bottom: 0.5rem;">SOS DISPATCHED</h2>
+            <p class="text-muted" style="margin-bottom: 1.5rem;">Emergency alerts and your live location are being broadcast to your contacts.</p>
+            <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 0.5rem; padding: 1rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; color: var(--danger);">
+                <i data-lucide="radio" class="live-dot" style="animation-duration: 0.8s;"></i> 
+                <span id="alertLocation" style="font-family: monospace; font-size: 0.9rem;">Transmitting...</span>
+            </div>
+            <button class="btn btn-block" style="background: var(--danger); color: white;" onclick="closeModal('sosModal')">DISMISS ALERT</button>
+        </div>
+    </div>
 
-        <!-- SOS Modal (Redesigned) -->
-        <div class="modal" id="sosModal">
-            <div class="modal-content premium-modal">
-                <div class="modal-danger-icon">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <h2 class="text-danger mb-2">SOS TRIGGERED!</h2>
-                <p class="mb-4 text-muted">Emergency alerts are being dispatched to your trusted contacts with your live location.</p>
-                <div class="alert-location-box" id="alertLocation">Fetching GPS...</div>
-                
-                <button class="btn btn-outline-danger btn-block mt-4" onclick="closeModal('sosModal')">
-                    DISMISS ALERT
+    <!-- Fake Call Modal -->
+    <div class="modal-overlay" id="fakeCallModal">
+        <div class="modal-content" style="background: linear-gradient(180deg, #1f2937 0%, #030712 100%); padding: 3rem 2rem;">
+            <div style="width: 80px; height: 80px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                <i data-lucide="user" style="width: 40px; height: 40px; color: white;"></i>
+            </div>
+            <h2 style="margin-bottom: 0.25rem;">Unknown Caller</h2>
+            <p class="text-muted" style="margin-bottom: 3rem;">Mobile • Incoming Call</p>
+            
+            <div style="display: flex; justify-content: space-around;">
+                <button class="btn" style="width: 64px; height: 64px; border-radius: 50%; background: var(--danger); color: white; padding: 0;" onclick="closeModal('fakeCallModal')">
+                    <i data-lucide="phone-off"></i>
+                </button>
+                <button class="btn" style="width: 64px; height: 64px; border-radius: 50%; background: var(--success); color: white; padding: 0;" onclick="closeModal('fakeCallModal')">
+                    <i data-lucide="phone"></i>
                 </button>
             </div>
         </div>
+    </div>
 
-        <!-- Fake Call Modal (Redesigned) -->
-        <div class="modal" id="fakeCallModal">
-            <div class="modal-content fake-call-screen">
-                <div class="caller-info">
-                    <h2 class="caller-name">Unknown Caller</h2>
-                    <p class="caller-sub">Mobile • Incoming Call</p>
-                </div>
-                
-                <div class="caller-avatar-large">
-                    <i class="fas fa-user"></i>
-                </div>
-                
-                <div class="call-controls-row mt-auto">
-                    <div class="call-btn-wrapper">
-                        <button class="call-btn decline-call" onclick="closeModal('fakeCallModal')">
-                            <i class="fas fa-phone-slash"></i>
-                        </button>
-                        <span>Decline</span>
-                    </div>
-                    <div class="call-btn-wrapper">
-                        <button class="call-btn accept-call" onclick="closeModal('fakeCallModal')">
-                            <i class="fas fa-phone"></i>
-                        </button>
-                        <span>Accept</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer"></div>
 
-        <!-- Background Audio (Played on SOS) -->
-        <audio id="sosSound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3" preload="auto"></audio>
-
-    </div> <!-- End of appContent -->
+    <!-- Hidden Audio -->
+    <audio id="sosSound" src="alarm.mp3" preload="auto"></audio>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
     <script src="script.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('Service Worker registered'))
                     .catch(err => console.log('Service Worker registration failed', err));
             });
         }
