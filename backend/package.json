@@ -1,0 +1,39 @@
+{
+  "name": "womens-safety-backend",
+  "version": "1.0.0",
+  "description": "Backend for Women Safety Emergency Alert System",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "prisma migrate deploy && node src/server.js",
+    "dev": "nodemon src/server.js",
+    "build": "prisma generate",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.10.2",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.2",
+    "express-validator": "^7.3.2",
+    "jsonwebtoken": "^9.0.2",
+    "prisma": "^5.22.0",
+    "twilio": "^6.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Masrath1416/womens-safety-backend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Masrath1416/womens-safety-backend/issues"
+  },
+  "homepage": "https://github.com/Masrath1416/womens-safety-backend#readme"
+}
