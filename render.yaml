@@ -7,7 +7,7 @@ services:
     region: oregon
     buildCommand: npm install
     startCommand: npm start
-    repo: https://github.com/your-username/shieldsafe.git
+    repo: https://github.com/Masrath1416/shieldsafe.git
     branch: main
     envVars:
       - key: PORT
@@ -20,5 +20,5 @@ services:
     plan: free
     region: oregon
     publishPath: frontend   # folder that contains index.html
-    repo: https://github.com/your-username/shieldsafe.git
+    repo: https://github.com/Masrath1416/shieldsafe.git
     branch: main
