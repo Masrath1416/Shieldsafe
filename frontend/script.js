@@ -1,5 +1,5 @@
 // ================= CONFIG =================
-const BASE_URL = "http://localhost:5000"; // Changed for local testing
+const BASE_URL = "https://womens-safety-backend-oz26.onrender.com"; // Production URL
 
 // ================= APP STATE =================
 let isSirenPlaying = false;
@@ -102,6 +102,16 @@ function showSection(sectionId) {
     // Update nav links
     const navLinks = document.querySelectorAll(".nav-links a");
     navLinks.forEach(link => {
+        if (link.getAttribute("href") === `#${sectionId}`) {
+            link.classList.add("active");
+        } else {
+            link.classList.remove("active");
+        }
+    });
+
+    // Update bottom nav links
+    const bottomNavLinks = document.querySelectorAll(".bottom-nav-item");
+    bottomNavLinks.forEach(link => {
         if (link.getAttribute("href") === `#${sectionId}`) {
             link.classList.add("active");
         } else {

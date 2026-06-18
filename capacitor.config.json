@@ -1,0 +1,6 @@
+{
+  "appId": "com.shieldsafe.app",
+  "appName": "ShieldSafe",
+  "webDir": "frontend",
+  "bundledWebRuntime": false
+}

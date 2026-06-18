@@ -301,6 +301,30 @@ section.active { display: block; }
     0% { transform: scale(0.8); opacity: 0.6; }
     100% { transform: scale(1.6); opacity: 0; }
 }
+.sos-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 40vh;
+    margin-bottom: 2rem;
+}
+
+/* Hide on small screens – mobile uses FAB */
+@media (max-width: 768px) {
+    .sos-center {
+        display: none;
+    }
+    .fab-sos-wrapper {
+        display: flex;
+    }
+}
+
+/* Show FAB only on mobile, hide on desktop */
+@media (min-width: 769px) {
+    .fab-sos-wrapper {
+        display: none;
+    }
+}
 
 /* Feature Grid */
 .grid-features {
@@ -587,13 +611,133 @@ section.active { display: block; }
 }
 
 /* Mobile Responsiveness */
+/* Mobile First Navigation & FAB */
+.mobile-nav-wrapper {
+    display: none;
+}
+
+.fab-sos-wrapper {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+    bottom: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1002;
+}
+
+.sos-btn-fab {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: var(--danger);
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 800;
+    border: 4px solid var(--bg-dark);
+    box-shadow: 0 4px 20px var(--danger-glow);
+    cursor: pointer;
+    position: relative;
+    z-index: 10;
+    transition: transform 0.2s;
+}
+
+.sos-btn-fab:active {
+    transform: scale(0.9);
+}
+
+.bottom-nav {
+    display: none;
+}
+
 @media (max-width: 768px) {
-    .nav-links {
+    .nav-links, .nav-actions {
         display: none;
-        /* Mobile menu styling could be expanded here */
     }
+    
+    nav {
+        padding: 1rem;
+        justify-content: center;
+    }
+    
+    .container {
+        padding: 5rem 1rem 120px; /* Space for bottom nav */
+    }
+    
     h1 { font-size: 2.5rem; }
-    .sos-btn-main { width: 150px; height: 150px; font-size: 2.5rem; }
-    .sos-wrapper { width: 200px; height: 200px; }
-    .container { padding: 6rem 1rem 2rem; }
+    
+    .mobile-nav-wrapper {
+        display: block;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+    }
+    
+    .bottom-nav {
+        display: flex;
+        justify-content: space-around;
+        background: rgba(15, 15, 20, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid var(--border-subtle);
+        padding: 0.5rem 0 1rem;
+        padding-bottom: env(safe-area-inset-bottom, 1rem); /* iPhone notch support */
+    }
+    
+    .bottom-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        gap: 4px;
+        flex: 1;
+        transition: var(--transition-fast);
+    }
+    
+    .bottom-nav-item i {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .bottom-nav-item.active {
+        color: var(--primary);
+    }
+    
+    /* Make buttons larger for touch targets */
+    .btn {
+        min-height: 48px;
+    }
+    
+    .card {
+        padding: 1.25rem;
+    }
+}
+
+/* For Desktop - keep FAB in bottom right */
+@media (min-width: 769px) {
+    .mobile-nav-wrapper {
+        display: block;
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 1000;
+    }
+    
+    .fab-sos-wrapper {
+        bottom: 0;
+        width: 100px;
+        height: 100px;
+    }
+    
+    .sos-btn-fab {
+        width: 90px;
+        height: 90px;
+        font-size: 1.5rem;
+    }
 }

@@ -130,21 +130,14 @@
         <div class="container">
             <!-- Home / Dashboard Section -->
             <section id="home" class="active">
+                <div class="sos-center">
+                    <button class="sos-btn-main" id="sosTriggerDesktop" onclick="triggerSOS()">SOS</button>
+                </div>
                 <div style="text-align: center;">
                     <h2>Safety <span class="text-gradient">Dashboard</span></h2>
                     <p class="text-muted">Quick access to emergency triggers and proactive tools.</p>
                 </div>
-                
-                <div class="sos-hero">
-                    <div class="sos-wrapper">
-                        <div class="sos-pulse-ring"></div>
-                        <div class="sos-pulse-ring"></div>
-                        <button class="sos-btn-main" id="sosTrigger" onclick="triggerSOS()">SOS</button>
-                    </div>
-                    <p class="text-muted" style="font-size: 0.9rem;"><i data-lucide="info" style="width: 14px; height: 14px; vertical-align: middle;"></i> Tap instantly in an emergency to alert contacts.</p>
-                </div>
-
-                <div class="grid-features">
+                <div class="grid-features" style="margin-top: 2rem;">
                     <div class="card feature-card" onclick="showSection('location')">
                         <div class="feature-icon-wrapper"><i data-lucide="map-pin"></i></div>
                         <div>
@@ -434,6 +427,33 @@
                 </div>
             </section>
 
+        </div>
+        
+        <!-- Mobile Bottom Navigation & FAB SOS -->
+        <div class="mobile-nav-wrapper">
+            <div class="fab-sos-wrapper">
+                <div class="sos-pulse-ring"></div>
+                <div class="sos-pulse-ring"></div>
+                <button class="sos-btn-fab" id="sosTriggerFab" onclick="triggerSOS()">SOS</button>
+            </div>
+            <div class="bottom-nav">
+                <a href="#home" class="bottom-nav-item active" onclick="showSection('home')">
+                    <i data-lucide="home"></i>
+                    <span>Home</span>
+                </a>
+                <a href="#journey" class="bottom-nav-item" onclick="showSection('journey')">
+                    <i data-lucide="route"></i>
+                    <span>SafeTrip</span>
+                </a>
+                <a href="#contacts" class="bottom-nav-item" onclick="showSection('contacts')">
+                    <i data-lucide="users"></i>
+                    <span>Contacts</span>
+                </a>
+                <a href="#safetytips" class="bottom-nav-item" onclick="showSection('safetytips')">
+                    <i data-lucide="book-open"></i>
+                    <span>Tips</span>
+                </a>
+            </div>
         </div>
     </div>
 
