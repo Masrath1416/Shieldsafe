@@ -14,7 +14,7 @@ services:
         value: "10000"
 
   # Frontend – Static site
-  - type: static
+  - type: web
     name: shieldsafe-frontend
     env: static
     plan: free
