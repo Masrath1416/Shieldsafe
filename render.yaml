@@ -1,24 +1,16 @@
 services:
-  # Backend – Node.js service
+  # Backend
   - type: web
     name: shieldsafe-backend
     env: node
-    plan: free
-    region: oregon
+    rootDir: backend
     buildCommand: npm install
     startCommand: npm start
-    repo: https://github.com/Masrath1416/shieldsafe.git
-    branch: main
-    envVars:
-      - key: PORT
-        value: "10000"
 
-  # Frontend – Static site
+  # Frontend
   - type: web
     name: shieldsafe-frontend
     env: static
-    plan: free
-    #region: oregon
-    #publishPath: frontend   # folder that contains index.html
-    #repo: https://github.com/Masrath1416/shieldsafe.git
-    #branch: main
+    rootDir: frontend
+    buildCommand: ""
+    startCommand: ""
