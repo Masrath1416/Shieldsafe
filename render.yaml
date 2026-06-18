@@ -18,7 +18,7 @@ services:
     name: shieldsafe-frontend
     env: static
     plan: free
-    region: oregon
-    publishPath: frontend   # folder that contains index.html
-    repo: https://github.com/Masrath1416/shieldsafe.git
-    branch: main
+    #region: oregon
+    #publishPath: frontend   # folder that contains index.html
+    #repo: https://github.com/Masrath1416/shieldsafe.git
+    #branch: main
