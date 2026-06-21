@@ -125,22 +125,34 @@
 
 const twilio = require("twilio");
 
-// Twilio setup
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+// Twilio setup - Safe Initialization
+let client = null;
+if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) {
+  client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+  console.log("[TWILIO] Client successfully initialized.");
+} else {
+  console.error("⚠️ [TWILIO ERROR] Missing Twilio environment variables. SMS will NOT work.");
+}
 
 exports.triggerSOS = async (req, res) => {
   try {
-    console.log("[API HIT] SOS Triggered");
+    console.log("[API HIT] POST /api/sos/trigger - SOS Triggered");
 
     const { latitude, longitude, contacts } = req.body;
 
     // ✅ Validate contacts
     if (!contacts || contacts.length === 0) {
+      console.warn("[SOS] Request rejected: No contacts provided.");
       return res.status(400).json({
         message: "No contacts provided"
+      });
+    }
+
+    // ✅ Check if Twilio is configured
+    if (!client) {
+      console.error("[SOS] Cannot send SMS: Twilio client not configured.");
+      return res.status(500).json({
+        message: "Twilio credentials are not configured on the server."
       });
     }
 
@@ -156,16 +168,18 @@ exports.triggerSOS = async (req, res) => {
           to: contact.phone
         });
 
-        console.log(`[TWILIO] Sent to ${contact.phone} (SID: ${response.sid})`);
+        console.log(`[TWILIO SUCCESS] SMS sent to ${contact.phone} (SID: ${response.sid})`);
         return { name: contact.name, phone: contact.phone, status: "DELIVERED" };
 
       } catch (err) {
-        console.error(`[TWILIO ERROR] ${contact.phone}:`, err.message);
+        console.error(`[TWILIO FAILED] Failed sending to ${contact.phone}:`, err.message);
         return { name: contact.name, phone: contact.phone, status: `FAILED: ${err.message}` };
       }
     });
 
     const alertsDispatch = await Promise.all(dispatchPromises);
+    
+    console.log("[SOS] Finished processing all SMS dispatches.");
 
     res.json({
       message: "SOS sent successfully",
@@ -173,7 +187,7 @@ exports.triggerSOS = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("SOS ERROR:", error);
+    console.error("[SOS ERROR] Unexpected failure during SOS dispatch:", error);
     res.status(500).json({
       message: "Failed to dispatch SOS alerts"
     });
