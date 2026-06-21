@@ -1,9 +1,13 @@
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config();
+const path = require("path");
 
-// DATABASE
-const prisma = require("./prisma");
+// ENV
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+
+// ❌ TEMPORARILY DISABLE DATABASE
+// const prisma = require("./prisma");
+
 const app = express();
 
 // ROUTES IMPORTS
@@ -15,7 +19,7 @@ const journeyRoutes = require("./journey/journey.routes");
 const timerRoutes = require("./timer/timer.routes");
 
 // MIDDLEWARES
-app.use(cors());
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
 // API ROUTES
@@ -39,32 +43,18 @@ app.get("/test", (req, res) => {
   });
 });
 
-// TEST DB
+// ❌ DISABLE DB TEST ROUTE (IMPORTANT)
 app.get("/test-db", async (req, res) => {
-  try {
-    console.log("Testing Database Connection...");
-    const userCount = await prisma.user.count();
-    
-    res.json({
-      status: "Success \u2705",
-      message: "Database is connected and tables exist.",
-      userCount
-    });
-  } catch (error) {
-    console.error("DB TEST ERROR:", error);
-    res.status(500).json({
-      status: "Error \u274C",
-      message: error.message,
-      code: error.code,
-      meta: error.meta
-    });
-  }
+  res.json({
+    status: "disabled",
+    message: "Database temporarily disabled"
+  });
 });
 
 // START SERVER
 const PORT = process.env.PORT || 5000;
 
-// Global Error Handler (Captures silent crashes)
+// GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {
   console.error("GLOBAL SERVER ERROR:", err.stack);
   res.status(500).json({
@@ -74,5 +64,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

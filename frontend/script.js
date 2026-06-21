@@ -1,7 +1,7 @@
 // ================= CONFIG =================
 //const BASE_URL = "https://womens-safety-backend-oz26.onrender.com"; // Production URL
 const BASE_URL = "https://shieldsafe-backend-production.up.railway.app";
-
+//const BASE_URL = "http://127.0.0.1:5000";
 // ================= APP STATE =================
 let isSirenPlaying = false;
 let journeyTimerInterval = null;
@@ -325,50 +325,30 @@ function handleGoogleAuth() {
 }
 
 // ================= CONTACTS =================
-async function addContact() {
+function addContact() {
     const name = document.getElementById("contactName")?.value;
     const phone = document.getElementById("contactPhone")?.value;
-    const token = localStorage.getItem("token");
 
-    if (!token) return alert("Please login first");
     if (!name || !phone) return alert("Please fill all fields");
 
-    try {
-        const res = await fetch(`${BASE_URL}/api/contacts`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ name, phone }),
-        });
-
-        if (res.ok) {
-            alert("Contact added ✅");
-            document.getElementById("contactName").value = "";
-            document.getElementById("contactPhone").value = "";
-            fetchContacts();
-        } else {
-            alert("Failed to add contact");
-        }
-    } catch (err) {
-        console.error(err);
-    }
+    const contacts = JSON.parse(localStorage.getItem("emergencyContacts") || "[]");
+    const newContact = {
+        id: Date.now().toString(),
+        name: name,
+        phone: phone
+    };
+    contacts.push(newContact);
+    localStorage.setItem("emergencyContacts", JSON.stringify(contacts));
+    
+    alert("Contact added ✅");
+    document.getElementById("contactName").value = "";
+    document.getElementById("contactPhone").value = "";
+    fetchContacts();
 }
 
-async function fetchContacts() {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    try {
-        const res = await fetch(`${BASE_URL}/api/contacts`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        renderContactList(data);
-    } catch (err) {
-        console.error("Failed to fetch contacts", err);
-    }
+function fetchContacts() {
+    const contacts = JSON.parse(localStorage.getItem("emergencyContacts") || "[]");
+    renderContactList(contacts);
 }
 
 function renderContactList(contacts) {
@@ -383,10 +363,10 @@ function renderContactList(contacts) {
     container.innerHTML = contacts.map(c => `
         <div class="list-item">
             <div style="display: flex; align-items: center; gap: 1rem;">
-                <div class="profile-avatar">${c.contactName.charAt(0)}</div>
+                <div class="profile-avatar">${c.name.charAt(0)}</div>
                 <div class="item-info">
-                    <h4>${c.contactName}</h4>
-                    <p>${c.contactPhone}</p>
+                    <h4>${c.name}</h4>
+                    <p>${c.phone}</p>
                 </div>
             </div>
             <button class="delete-btn" onclick="deleteContact('${c.id}')">
@@ -397,21 +377,13 @@ function renderContactList(contacts) {
     if (window.lucide) lucide.createIcons();
 }
 
-async function deleteContact(id) {
+function deleteContact(id) {
     if (!confirm("Are you sure you want to delete this contact?")) return;
 
-    const token = localStorage.getItem("token");
-    try {
-        const res = await fetch(`${BASE_URL}/api/contacts/${id}`, {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
-            fetchContacts();
-        }
-    } catch (err) {
-        console.error("Delete failed", err);
-    }
+    let contacts = JSON.parse(localStorage.getItem("emergencyContacts") || "[]");
+    contacts = contacts.filter(c => c.id !== id);
+    localStorage.setItem("emergencyContacts", JSON.stringify(contacts));
+    fetchContacts();
 }
 
 // ================= SOS & LOCATION =================
@@ -436,13 +408,20 @@ async function triggerSOS() {
         document.getElementById("alertLocation").innerText = `Location: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
 
         try {
+            // Retrieve contacts from localStorage as requested
+            const storedContacts = JSON.parse(localStorage.getItem("emergencyContacts") || "[]");
+            
+            console.log("SOS button clicked!");
+            console.log("Contacts retrieved from frontend:", storedContacts);
+            console.log("Sending request to backend API...");
+
             const res = await fetch(`${BASE_URL}/api/sos/trigger`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ latitude, longitude }),
+                body: JSON.stringify({ latitude, longitude, contacts: storedContacts }),
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Failed to trigger SOS");
