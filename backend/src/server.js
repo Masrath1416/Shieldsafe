@@ -60,6 +60,11 @@ app.get("/test-db", async (req, res) => {
   });
 });
 
+// HEALTHCHECK ROUTE (Prevents Railway container stopping)
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
 // START SERVER
 const PORT = process.env.PORT || 5000;
 
@@ -72,6 +77,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
 });

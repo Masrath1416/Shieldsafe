@@ -427,17 +427,23 @@ async function triggerSOS() {
             if (!res.ok) throw new Error(data.error || "Failed to trigger SOS");
             console.log("SOS Triggered Successfully:", data);
             
-            // Show detailed Twilio error if the dispatch failed
-            if (data.alertsDispatch) {
+            // Show accurate success/error messages based on backend response
+            if (data.alertsDispatch && data.alertsDispatch.length > 0) {
                 const failedAlerts = data.alertsDispatch.filter(a => a.status.startsWith("FAILED"));
                 if (failedAlerts.length > 0) {
-                    alert(`SOS Triggered, but SMS failed: ${failedAlerts[0].status} ❌`);
+                    alert(`SOS Triggered, but SMS failed to some contacts: ${failedAlerts[0].status} ❌`);
+                } else {
+                    alert("SMS Sent Successfully to all contacts! ✅");
                 }
+            } else if (data.alertsDispatch && data.alertsDispatch.length === 0) {
+                alert("No contacts configured to receive SMS. ❌");
+            } else {
+                alert("SMS Sent Successfully! ✅");
             }
 
         } catch (err) {
             console.error("SOS Alert failed to send to server", err);
-            alert("Failed to reach server. Call emergency numbers manually! ❌");
+            alert("Failed to Send SMS. Call emergency numbers manually! ❌");
         } finally {
             if (sosBtn) {
                 sosBtn.innerText = "SOS";
