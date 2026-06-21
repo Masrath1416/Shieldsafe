@@ -1,7 +1,3 @@
-const { PrismaClient } = require("@prisma/client");
-
-// Create a single Prisma Client instance
-const prisma = new PrismaClient();
-
-// Export it so we can use it in other files
+// Database is disabled. Redirecting to the mocked Prisma client.
+const prisma = require("./config/prismaClient");
 module.exports = prisma;

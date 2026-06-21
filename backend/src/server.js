@@ -1,3 +1,12 @@
+// GLOBAL CRASH PROTECTION
+process.on('uncaughtException', (err) => {
+  console.error("🔥 FATAL: Uncaught Exception:", err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error("🔥 FATAL: Unhandled Rejection at:", promise, "reason:", reason);
+});
+
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
