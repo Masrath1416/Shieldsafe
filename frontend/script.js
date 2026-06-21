@@ -388,81 +388,155 @@ function deleteContact(id) {
 
 // ================= SOS & LOCATION =================
 async function triggerSOS() {
-    if (!navigator.onLine) return alert("No internet connection! ❌");
-    const token = localStorage.getItem("token");
-    if (!token) return alert("Please login first");
+    console.log("=== [SOS] Button clicked ===");
 
-    if (!navigator.geolocation) return alert("Geolocation not supported");
-
-    const sosBtn = document.getElementById("sosTrigger");
-    if (sosBtn) {
-        sosBtn.innerText = "Sending...";
-        sosBtn.style.opacity = "0.7";
-        sosBtn.style.pointerEvents = "none";
+    // ── Pre-flight checks ──────────────────────────────────────────────────
+    if (!navigator.onLine) {
+        alert("No internet connection. Cannot send SOS! ❌");
+        return;
     }
 
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        showModal('sosModal');
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("You are not logged in. Please login to use SOS. ❌");
+        return;
+    }
+
+    const storedContacts = JSON.parse(localStorage.getItem("emergencyContacts") || "[]");
+    if (storedContacts.length === 0) {
+        alert("No emergency contacts saved. Go to Contacts and add at least one contact first! ❌");
+        return;
+    }
+
+    console.log("[SOS] Contacts loaded:", storedContacts.length, "contacts");
+
+    // ── Disable both SOS buttons while sending ─────────────────────────────
+    const sosBtns = ["sosTriggerDesktop", "sosTriggerFab"].map(id => document.getElementById(id)).filter(Boolean);
+    sosBtns.forEach(btn => {
+        btn.innerText = "Sending...";
+        btn.style.opacity = "0.7";
+        btn.style.pointerEvents = "none";
+    });
+
+    // ── Helper: fire the API call ──────────────────────────────────────────
+    async function fireSOSRequest(latitude, longitude) {
+        const payload = { latitude, longitude, contacts: storedContacts };
+        console.log("[SOS] Calling API:", `${BASE_URL}/api/sos/trigger`);
+        console.log("[SOS] Payload:", JSON.stringify(payload));
+
+        const res = await fetch(`${BASE_URL}/api/sos/trigger`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        console.log("[SOS] Server response:", data);
+
+        if (!res.ok) {
+            throw new Error(data.message || `Server error ${res.status}`);
+        }
+
+        return data;
+    }
+
+    // ── Helper: show result toast ──────────────────────────────────────────
+    function showSOSResult(data) {
+        const dispatch = data.alertsDispatch || [];
+        if (dispatch.length === 0) {
+            alert("SOS triggered but no contacts were reached. ❌");
+            return;
+        }
+
+        const delivered = dispatch.filter(a => a.status === "DELIVERED");
+        const failed    = dispatch.filter(a => a.status !== "DELIVERED");
+
+        if (failed.length === 0) {
+            alert(`✅ SOS sent! SMS delivered to all ${delivered.length} contact(s).`);
+        } else if (delivered.length === 0) {
+            alert(`❌ SOS API reached but all SMS failed.\nError: ${failed[0].status}`);
+        } else {
+            alert(`⚠️ SOS partially sent.\n✅ Delivered: ${delivered.length}\n❌ Failed: ${failed.length} — ${failed[0].status}`);
+        }
+    }
+
+    // ── Get GPS then fire ──────────────────────────────────────────────────
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                const { latitude, longitude } = pos.coords;
+                console.log("[SOS] GPS obtained:", latitude, longitude);
+
+                // Show modal immediately
+                showModal("sosModal");
+                playSiren();
+                const locEl = document.getElementById("alertLocation");
+                if (locEl) locEl.innerText = `📍 ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+
+                try {
+                    const data = await fireSOSRequest(latitude, longitude);
+                    showSOSResult(data);
+                } catch (err) {
+                    console.error("[SOS] API error:", err);
+                    alert(`Failed to reach server: ${err.message} ❌`);
+                } finally {
+                    sosBtns.forEach(btn => {
+                        btn.innerText = "SOS";
+                        btn.style.opacity = "1";
+                        btn.style.pointerEvents = "auto";
+                    });
+                }
+            },
+            async (gpsErr) => {
+                // GPS denied — still send SOS without location
+                console.warn("[SOS] GPS denied:", gpsErr.message, "— sending without location");
+
+                showModal("sosModal");
+                playSiren();
+                const locEl = document.getElementById("alertLocation");
+                if (locEl) locEl.innerText = "📍 Location unavailable";
+
+                try {
+                    const data = await fireSOSRequest(null, null);
+                    showSOSResult(data);
+                } catch (err) {
+                    console.error("[SOS] API error (no GPS):", err);
+                    alert(`Failed to reach server: ${err.message} ❌`);
+                } finally {
+                    sosBtns.forEach(btn => {
+                        btn.innerText = "SOS";
+                        btn.style.opacity = "1";
+                        btn.style.pointerEvents = "auto";
+                    });
+                }
+            },
+            { timeout: 8000, enableHighAccuracy: true }
+        );
+    } else {
+        // Browser has no geolocation at all
+        console.warn("[SOS] Geolocation not supported — sending without location");
+        showModal("sosModal");
         playSiren();
-        document.getElementById("alertLocation").innerText = `Location: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
 
         try {
-            // Retrieve contacts from localStorage as requested
-            const storedContacts = JSON.parse(localStorage.getItem("emergencyContacts") || "[]");
-            
-            console.log("SOS button clicked!");
-            console.log("Contacts retrieved from frontend:", storedContacts);
-            console.log("Sending request to backend API...");
-
-            const res = await fetch(`${BASE_URL}/api/sos/trigger`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ latitude, longitude, contacts: storedContacts }),
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Failed to trigger SOS");
-            console.log("SOS Triggered Successfully:", data);
-            
-            // Show accurate success/error messages based on backend response
-            if (data.alertsDispatch && data.alertsDispatch.length > 0) {
-                const failedAlerts = data.alertsDispatch.filter(a => a.status.startsWith("FAILED"));
-                if (failedAlerts.length > 0) {
-                    alert(`SOS Triggered, but SMS failed to some contacts: ${failedAlerts[0].status} ❌`);
-                } else {
-                    alert("SMS Sent Successfully to all contacts! ✅");
-                }
-            } else if (data.alertsDispatch && data.alertsDispatch.length === 0) {
-                alert("No contacts configured to receive SMS. ❌");
-            } else {
-                alert("SMS Sent Successfully! ✅");
-            }
-
+            const data = await fireSOSRequest(null, null);
+            showSOSResult(data);
         } catch (err) {
-            console.error("SOS Alert failed to send to server", err);
-            alert("Failed to Send SMS. Call emergency numbers manually! ❌");
+            console.error("[SOS] API error (no geolocation):", err);
+            alert(`Failed to reach server: ${err.message} ❌`);
         } finally {
-            if (sosBtn) {
-                sosBtn.innerText = "SOS";
-                sosBtn.style.opacity = "1";
-                sosBtn.style.pointerEvents = "auto";
-            }
+            sosBtns.forEach(btn => {
+                btn.innerText = "SOS";
+                btn.style.opacity = "1";
+                btn.style.pointerEvents = "auto";
+            });
         }
-    }, (err) => {
-        console.error("GPS Error:", err);
-        alert("Location access denied! SOS triggered without GPS. ❌");
-        if (sosBtn) {
-            sosBtn.innerText = "SOS";
-            sosBtn.style.opacity = "1";
-            sosBtn.style.pointerEvents = "auto";
-        }
-        showModal('sosModal');
-        playSiren();
-    });
+    }
 }
+
 
 // ================= LIVE MAP LOGIC =================
 function initMap() {

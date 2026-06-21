@@ -9,10 +9,17 @@ process.on('unhandledRejection', (reason, promise) => {
 
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
 
-// ENV
-require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+// ✅ ENV: Load .env for local dev only.
+// override:false means Railway/Cloud injected vars always take priority.
+require("dotenv").config({ override: false });
+
+// ✅ Startup diagnostics — visible in Railway logs
+console.log("[ENV] NODE_ENV:", process.env.NODE_ENV || "(not set)");
+console.log("[ENV] PORT:", process.env.PORT || "(not set — will use 5000)");
+console.log("[ENV] TWILIO_ACCOUNT_SID:", process.env.TWILIO_ACCOUNT_SID ? `${process.env.TWILIO_ACCOUNT_SID.slice(0,4)}...` : "❌ MISSING");
+console.log("[ENV] TWILIO_AUTH_TOKEN:", process.env.TWILIO_AUTH_TOKEN ? "✅ present" : "❌ MISSING");
+console.log("[ENV] TWILIO_PHONE_NUMBER:", process.env.TWILIO_PHONE_NUMBER || "❌ MISSING");
 
 // ❌ TEMPORARILY DISABLE DATABASE
 // const prisma = require("./prisma");
