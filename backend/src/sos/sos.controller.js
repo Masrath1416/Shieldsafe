@@ -77,14 +77,23 @@ exports.triggerSOS = async (req, res) => {
     }
 
     // ── 5. Build location URL ─────────────────────────────────────────────
-    const locationUrl = (latitude && longitude)
+    const hasLocation =
+      latitude !== undefined &&
+      latitude !== null &&
+      longitude !== undefined &&
+      longitude !== null &&
+      latitude !== "" &&
+      longitude !== "";
+
+    const locationText = hasLocation
       ? `https://maps.google.com/?q=${latitude},${longitude}`
-      : "Location unavailable";
+      : "Location not available";
 
     const messageBody =
-      `🚨 EMERGENCY ALERT — ShieldSafe\n` +
-      `Someone needs immediate help!\n` +
-      `📍 Live Location: ${locationUrl}`;
+      `🚨 Emergency! I am in danger.\n` +
+      `📍 Location: ${locationText}`;
+
+    console.log("[SOS] SMS body:", messageBody);
 
     // ── 6. Send SMS to every contact ──────────────────────────────────────
     console.log("[SOS] Dispatching SMS to all contacts...");
@@ -128,6 +137,7 @@ exports.triggerSOS = async (req, res) => {
       message: `SOS dispatched. ${delivered} SMS sent, ${failed} failed.`,
       delivered,
       failed,
+      location: locationText,
       alertsDispatch: dispatchResults
     });
 
