@@ -409,6 +409,7 @@ async function triggerSOS() {
     }
 
     console.log("[SOS] Contacts loaded:", storedContacts.length, "contacts");
+    showToast("Getting location...", "info");
 
     // ── Disable both SOS buttons while sending ─────────────────────────────
     const sosBtns = ["sosTriggerDesktop", "sosTriggerFab"].map(id => document.getElementById(id)).filter(Boolean);
@@ -423,6 +424,7 @@ async function triggerSOS() {
         const payload = { latitude, longitude, contacts: storedContacts };
         console.log("[SOS] Calling API:", `${BASE_URL}/api/sos/trigger`);
         console.log("[SOS] Payload:", JSON.stringify(payload));
+        showToast("Sending alert...", "info");
 
         const res = await fetch(`${BASE_URL}/api/sos/trigger`, {
             method: "POST",
@@ -455,7 +457,7 @@ async function triggerSOS() {
         const failed    = dispatch.filter(a => a.status !== "DELIVERED");
 
         if (failed.length === 0) {
-            alert(`✅ SOS sent! SMS delivered to all ${delivered.length} contact(s).`);
+            alert(`SMS sent successfully to all ${delivered.length} contact(s).`);
         } else if (delivered.length === 0) {
             alert(`❌ SOS API reached but all SMS failed.\nError: ${failed[0].status}`);
         } else {
