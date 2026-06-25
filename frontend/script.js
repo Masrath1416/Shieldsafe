@@ -6,6 +6,7 @@ const BASE_URL = "https://shieldsafe-backend-production.up.railway.app";
 let isSirenPlaying = false;
 let journeyTimerInterval = null;
 let sirenAudio = document.getElementById("sosSound");
+let deferredInstallPrompt = null;
 
 // ================= LIVE MAP STATE =================
 let map = null;
@@ -27,6 +28,38 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }, 2000);
 });
+
+window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+
+    const installBtn = document.getElementById("installAppBtn");
+    if (installBtn) installBtn.style.display = "inline-flex";
+});
+
+window.addEventListener("appinstalled", () => {
+    deferredInstallPrompt = null;
+    const installBtn = document.getElementById("installAppBtn");
+    if (installBtn) installBtn.style.display = "none";
+    showToast("ShieldSafe installed successfully", "success");
+});
+
+window.addEventListener("online", () => showToast("Back online", "success"));
+window.addEventListener("offline", () => showToast("You are offline. SOS needs internet to send SMS.", "error"));
+
+async function installApp() {
+    if (!deferredInstallPrompt) {
+        showToast("Install option is not available yet", "info");
+        return;
+    }
+
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+
+    const installBtn = document.getElementById("installAppBtn");
+    if (installBtn) installBtn.style.display = "none";
+}
 
 function checkAuthStatus() {
     const token = localStorage.getItem("token");

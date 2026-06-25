@@ -3,15 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShieldSafe - Premium Women Safety</title>
+    <title>ShieldSafe - Women Safety App</title>
     <!-- Modern Typography -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="/icon-192.png">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    <meta name="theme-color" content="#070709">
+    <meta name="theme-color" content="#ef4444">
+    <meta name="background-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="ShieldSafe">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
     <!-- Splash Screen -->
@@ -119,6 +126,9 @@
             </div>
 
             <div class="nav-actions">
+                <button class="btn btn-secondary install-app-btn" id="installAppBtn" type="button" onclick="installApp()" style="display: none;">
+                    <i data-lucide="download"></i> Install
+                </button>
                 <div class="profile-trigger" onclick="handleLogout()" title="Logout">
                     <div class="profile-avatar"><i data-lucide="user" style="width: 16px; height: 16px;"></i></div>
                     <span id="userName" style="font-size: 0.85rem; font-weight: 600;">Profile</span>
@@ -502,7 +512,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
+                navigator.serviceWorker.register('/service-worker.js')
                     .catch(err => console.log('Service Worker registration failed', err));
             });
         }
