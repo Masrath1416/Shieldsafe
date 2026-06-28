@@ -126,7 +126,7 @@
             </div>
 
             <div class="nav-actions">
-                <button class="btn btn-secondary install-app-btn" id="installAppBtn" type="button" onclick="installApp()" style="display: none;">
+                <button class="btn btn-secondary install-app-btn" type="button" onclick="installApp()" hidden>
                     <i data-lucide="download"></i> Install
                 </button>
                 <div class="profile-trigger" onclick="handleLogout()" title="Logout">
@@ -441,6 +441,11 @@
         
         <!-- Mobile Bottom Navigation -->
         <div class="mobile-nav-wrapper">
+            <div class="fab-sos-wrapper">
+                <button class="sos-btn-fab" id="sosTriggerFab" type="button" onclick="triggerSOS()" aria-label="Send SOS alert">
+                    SOS
+                </button>
+            </div>
             <div class="bottom-nav">
                 <a href="#home" class="bottom-nav-item active" onclick="showSection('home')">
                     <i data-lucide="home"></i>
@@ -458,6 +463,10 @@
                     <i data-lucide="book-open"></i>
                     <span>Tips</span>
                 </a>
+                <button class="bottom-nav-item install-app-btn" type="button" onclick="installApp()" hidden>
+                    <i data-lucide="download"></i>
+                    <span>Install</span>
+                </button>
             </div>
         </div>
     </div>
@@ -513,9 +522,16 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => registration.update())
                     .catch(err => console.log('Service Worker registration failed', err));
             });
         }
     </script>
+    
+    
+
+<button id="installBtn" class="install-btn" style="display:none;">
+  Install ShieldSafe
+</button>
 </body>
 </html>

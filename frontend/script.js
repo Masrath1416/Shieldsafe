@@ -33,14 +33,12 @@ window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
     deferredInstallPrompt = event;
 
-    const installBtn = document.getElementById("installAppBtn");
-    if (installBtn) installBtn.style.display = "inline-flex";
+    setInstallButtonsVisible(true);
 });
 
 window.addEventListener("appinstalled", () => {
     deferredInstallPrompt = null;
-    const installBtn = document.getElementById("installAppBtn");
-    if (installBtn) installBtn.style.display = "none";
+    setInstallButtonsVisible(false);
     showToast("ShieldSafe installed successfully", "success");
 });
 
@@ -48,8 +46,14 @@ window.addEventListener("online", () => showToast("Back online", "success"));
 window.addEventListener("offline", () => showToast("You are offline. SOS needs internet to send SMS.", "error"));
 
 async function installApp() {
+    if (isRunningStandalone()) {
+        showToast("ShieldSafe is already installed", "success");
+        setInstallButtonsVisible(false);
+        return;
+    }
+
     if (!deferredInstallPrompt) {
-        showToast("Install option is not available yet", "info");
+        showToast("Install from your browser menu if the prompt is unavailable", "info");
         return;
     }
 
@@ -57,8 +61,17 @@ async function installApp() {
     await deferredInstallPrompt.userChoice;
     deferredInstallPrompt = null;
 
-    const installBtn = document.getElementById("installAppBtn");
-    if (installBtn) installBtn.style.display = "none";
+    setInstallButtonsVisible(false);
+}
+
+function setInstallButtonsVisible(isVisible) {
+    document.querySelectorAll(".install-app-btn").forEach((button) => {
+        button.hidden = !isVisible;
+    });
+}
+
+function isRunningStandalone() {
+    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
 }
 
 function checkAuthStatus() {
