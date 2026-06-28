@@ -412,20 +412,28 @@ function renderContactList(contacts) {
     if (!container) return;
 
     if (!contacts || contacts.length === 0) {
-        container.innerHTML = `<p style="text-align: center; color: var(--text-muted); margin-top: 2rem;">No contacts added yet.</p>`;
+        container.innerHTML = `
+            <div class="contacts-empty-state">
+                <div class="contacts-empty-icon">
+                    <i data-lucide="users"></i>
+                </div>
+                <h4 class="contacts-empty-title">No contacts yet</h4>
+                <p class="contacts-empty-text">Add trusted friends or family members above. They'll receive your SOS alerts with your live location.</p>
+            </div>`;
+        if (window.lucide) lucide.createIcons();
         return;
     }
 
     container.innerHTML = contacts.map(c => `
-        <div class="list-item">
-            <div style="display: flex; align-items: center; gap: 1rem;">
-                <div class="profile-avatar">${c.name.charAt(0)}</div>
-                <div class="item-info">
-                    <h4>${c.name}</h4>
-                    <p>${c.phone}</p>
+        <div class="contact-card">
+            <div class="contact-card-left">
+                <div class="contact-avatar">${c.name.charAt(0).toUpperCase()}</div>
+                <div class="contact-info">
+                    <h4 class="contact-name">${c.name}</h4>
+                    <p class="contact-phone"><i data-lucide="phone" style="width:12px;height:12px;display:inline;vertical-align:middle;margin-right:4px;"></i>${c.phone}</p>
                 </div>
             </div>
-            <button class="delete-btn" onclick="deleteContact('${c.id}')">
+            <button class="contact-delete-btn" onclick="deleteContact('${c.id}')" aria-label="Delete ${c.name}">
                 <i data-lucide="trash-2"></i>
             </button>
         </div>

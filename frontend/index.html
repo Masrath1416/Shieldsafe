@@ -237,28 +237,53 @@
 
             <!-- Contacts Section -->
             <section id="contacts">
-                <div style="margin-bottom: 2rem;">
-                    <h2>Emergency <span class="text-gradient">Contacts</span></h2>
-                    <p class="text-muted">Manage your trusted response network.</p>
-                </div>
-                
-                <div class="card" style="margin-bottom: 2rem;">
-                    <h3 style="margin-bottom: 1.5rem; font-size: 1.1rem;">Add New Contact</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem; align-items: end;">
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <input type="text" id="contactName" class="form-input" placeholder=" ">
-                            <label class="form-label">Contact Name</label>
-                        </div>
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <input type="tel" id="contactPhone" class="form-input" placeholder=" ">
-                            <label class="form-label">Phone Number</label>
-                        </div>
-                        <button class="btn btn-primary" onclick="addContact()">
-                            <i data-lucide="plus"></i> Add
-                        </button>
+                <!-- Section Header -->
+                <div class="section-header">
+                    <div class="section-header-icon">
+                        <i data-lucide="users"></i>
+                    </div>
+                    <div>
+                        <h2 class="section-title">Emergency <span class="text-gradient">Contacts</span></h2>
+                        <p class="section-subtitle">People who receive your SOS alerts instantly.</p>
                     </div>
                 </div>
 
+                <!-- Add Contact Card -->
+                <div class="add-contact-card">
+                    <div class="add-contact-card-header">
+                        <i data-lucide="user-plus" class="add-contact-icon"></i>
+                        <div>
+                            <h3 class="add-contact-title">Add New Contact</h3>
+                            <p class="add-contact-subtitle">Enter name and phone number</p>
+                        </div>
+                    </div>
+
+                    <div class="add-contact-form">
+                        <div class="form-group">
+                            <div class="input-wrapper">
+                                <i data-lucide="user" class="input-icon"></i>
+                                <input type="text" id="contactName" class="form-input contact-input" placeholder="Full Name">
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <div class="input-wrapper">
+                                <i data-lucide="phone" class="input-icon"></i>
+                                <input type="tel" id="contactPhone" class="form-input contact-input" placeholder="Phone Number (e.g. +91 98765 43210)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-add-contact" onclick="addContact()">
+                        <i data-lucide="user-plus"></i>
+                        Add Emergency Contact
+                    </button>
+                </div>
+
+                <!-- Contact List -->
+                <div class="contacts-section-label">
+                    <i data-lucide="shield-check"></i>
+                    <span>Your Trusted Network</span>
+                </div>
                 <div id="contactList">
                     <!-- Contacts injected here -->
                 </div>
