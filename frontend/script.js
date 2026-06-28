@@ -82,6 +82,13 @@ function checkAuthStatus() {
         if (userName) {
             document.getElementById("userName").innerText = userName;
         }
+        const userPhoto = localStorage.getItem("userPhoto");
+        if (userPhoto) {
+            const navAvatar = document.getElementById("navAvatar");
+            if (navAvatar) {
+                navAvatar.innerHTML = `<img src="${userPhoto}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+            }
+        }
         showApp();
     } else {
         showWelcome();
@@ -144,6 +151,9 @@ function showSection(sectionId) {
     }
     if (sectionId === 'safetytips') {
         renderTips('all');
+    }
+    if (sectionId === 'settings') {
+        loadProfile();
     }
 
     // Update nav links
@@ -838,3 +848,123 @@ window.alert = function(message) {
         showToast(message, 'success');
     }
 };
+
+// ================= SETTINGS & PROFILE LOGIC =================
+
+function loadProfile() {
+    const name = localStorage.getItem("userName") || "";
+    const phone = localStorage.getItem("userPhone") || "";
+    const photo = localStorage.getItem("userPhoto") || "";
+
+    const nameInput = document.getElementById("profileName");
+    const phoneInput = document.getElementById("profilePhone");
+    const imgEl = document.getElementById("profileImage");
+    const placeholderEl = document.getElementById("profileImagePlaceholder");
+
+    if (nameInput) nameInput.value = name;
+    if (phoneInput) phoneInput.value = phone;
+
+    if (imgEl && placeholderEl) {
+        if (photo) {
+            imgEl.src = photo;
+            imgEl.style.display = "block";
+            placeholderEl.style.display = "none";
+        } else {
+            imgEl.src = "";
+            imgEl.style.display = "none";
+            placeholderEl.style.display = "block";
+            placeholderEl.innerText = name ? name.charAt(0).toUpperCase() : "U";
+        }
+    }
+
+    // Refresh nav header avatar as well
+    const navAvatar = document.getElementById("navAvatar");
+    if (navAvatar) {
+        if (photo) {
+            navAvatar.innerHTML = `<img src="${photo}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+        } else {
+            navAvatar.innerHTML = `<i data-lucide="user" style="width: 16px; height: 16px;"></i>`;
+            if (window.lucide) lucide.createIcons();
+        }
+    }
+
+    renderSettingsContacts();
+}
+
+function saveProfile() {
+    const name = document.getElementById("profileName")?.value.trim();
+    const phone = document.getElementById("profilePhone")?.value.trim();
+
+    if (!name) {
+        alert("Name cannot be empty ❌");
+        return;
+    }
+
+    localStorage.setItem("userName", name);
+    localStorage.setItem("userPhone", phone);
+
+    const userNameEl = document.getElementById("userName");
+    if (userNameEl) userNameEl.innerText = name;
+
+    showToast("Profile saved successfully ✅", "success");
+    loadProfile();
+}
+
+function triggerPhotoUpload() {
+    const fileInput = document.getElementById("profilePhotoInput");
+    if (fileInput) fileInput.click();
+}
+
+function handlePhotoUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        alert("Please select a valid image file ❌");
+        return;
+    }
+
+    // 2MB Limit to avoid exceeding localStorage quota
+    if (file.size > 2 * 1024 * 1024) {
+        alert("Image must be smaller than 2MB ❌");
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const dataUrl = e.target.result;
+        localStorage.setItem("userPhoto", dataUrl);
+        loadProfile();
+        showToast("Profile photo updated ✅", "success");
+    };
+    reader.readAsDataURL(file);
+}
+
+function renderSettingsContacts() {
+    const container = document.getElementById("settingsContactsList");
+    if (!container) return;
+
+    const contacts = JSON.parse(localStorage.getItem("emergencyContacts") || "[]");
+
+    if (!contacts || contacts.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 1rem; color: var(--text-muted); font-size: 0.9rem;">
+                No emergency contacts added yet.
+                <button class="btn btn-secondary" onclick="showSection('contacts')" style="margin-top: 0.5rem; padding: 0.4rem 0.8rem; font-size: 0.8rem; display: block; margin-left: auto; margin-right: auto;">
+                    Add Contacts
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = contacts.map(c => `
+        <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(255,255,255,0.01); border: 1px solid var(--border-subtle); border-radius: 6px;">
+            <div class="profile-avatar" style="width: 24px; height: 24px; font-size: 0.7rem; min-width: 24px;">${c.name.charAt(0).toUpperCase()}</div>
+            <div style="flex: 1; min-width: 0; text-align: left;">
+                <h4 style="font-size: 0.85rem; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-primary);">${c.name}</h4>
+                <p style="font-size: 0.75rem; margin: 0; color: var(--text-secondary);">${c.phone}</p>
+            </div>
+        </div>
+    `).join('');
+}

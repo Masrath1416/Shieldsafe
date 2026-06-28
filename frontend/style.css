@@ -808,3 +808,13 @@ section.active { display: block; }
         display: none;
     }
 }
+
+/* Profile Avatar Hover Effects */
+.profile-avatar-container:hover .avatar-overlay {
+    opacity: 1 !important;
+}
+.profile-avatar-container:hover {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 15px var(--primary-glow);
+}
+

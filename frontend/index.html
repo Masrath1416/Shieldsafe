@@ -123,16 +123,17 @@
                 <a href="#history" class="nav-item" onclick="showSection('history')">Activity</a>
                 <a href="#safetytips" class="nav-item" onclick="showSection('safetytips')">Safety Tips</a>
                 <a href="#howitworks" class="nav-item" onclick="showSection('howitworks')">Guide</a>
+                <a href="#settings" class="nav-item" onclick="showSection('settings')">Settings</a>
             </div>
 
             <div class="nav-actions">
                 <button class="btn btn-secondary install-app-btn" type="button" onclick="installApp()" hidden>
                     <i data-lucide="download"></i> Install
                 </button>
-                <div class="profile-trigger" onclick="handleLogout()" title="Logout">
-                    <div class="profile-avatar"><i data-lucide="user" style="width: 16px; height: 16px;"></i></div>
+                <div class="profile-trigger" onclick="showSection('settings')" title="Settings & Profile">
+                    <div class="profile-avatar" id="navAvatar"><i data-lucide="user" style="width: 16px; height: 16px;"></i></div>
                     <span id="userName" style="font-size: 0.85rem; font-weight: 600;">Profile</span>
-                    <i data-lucide="log-out" style="width: 16px; height: 16px; color: var(--text-secondary);"></i>
+                    <i data-lucide="settings" style="width: 16px; height: 16px; color: var(--text-secondary);"></i>
                 </div>
             </div>
         </nav>
@@ -437,6 +438,73 @@
                 </div>
             </section>
 
+            <!-- Settings & Profile Section -->
+            <section id="settings">
+                <div style="margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h2>Settings & <span class="text-gradient">Profile</span></h2>
+                        <p class="text-muted">Manage your personal information and preferences.</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="showSection('home')" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                        <i data-lucide="arrow-left"></i> Back to Home
+                    </button>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; max-width: 600px; margin: 0 auto;">
+                    <!-- Profile Card -->
+                    <div class="card profile-card" style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1.5rem;">
+                        <!-- Avatar Section -->
+                        <div class="profile-avatar-container" onclick="triggerPhotoUpload()" style="position: relative; width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--border-subtle); cursor: pointer; overflow: hidden; background: var(--bg-elevated); display: flex; align-items: center; justify-content: center; transition: border-color var(--transition-fast);">
+                            <img id="profileImage" src="" alt="Profile Image" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+                            <div id="profileImagePlaceholder" class="profile-image-placeholder" style="font-size: 2.5rem; font-weight: 700; color: var(--text-secondary); font-family: 'Poppins', sans-serif;">U</div>
+                            <div class="avatar-overlay" style="position: absolute; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; display: flex; align-items: center; justify-content: center; color: white; transition: opacity var(--transition-fast);">
+                                <i data-lucide="camera" style="width: 24px; height: 24px;"></i>
+                            </div>
+                        </div>
+                        <input type="file" id="profilePhotoInput" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)">
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: -1rem;">Tap photo to upload</div>
+                        
+                        <div style="width: 100%; text-align: left;">
+                            <div class="form-group">
+                                <input type="text" id="profileName" class="form-input" placeholder=" ">
+                                <label class="form-label">Full Name</label>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <input type="tel" id="profilePhone" class="form-input" placeholder=" ">
+                                <label class="form-label">Phone Number</label>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary btn-block" onclick="saveProfile()">
+                            <i data-lucide="save"></i> Save Changes
+                        </button>
+                    </div>
+
+                    <!-- Emergency Contacts Quick View -->
+                    <div class="card">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+                            <h3 style="font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                                <i data-lucide="users" style="color: var(--primary);"></i> Emergency Contacts
+                            </h3>
+                            <button class="btn btn-secondary" onclick="showSection('contacts')" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                                Manage
+                            </button>
+                        </div>
+                        <div id="settingsContactsList" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            <!-- Injected by script.js -->
+                        </div>
+                    </div>
+
+                    <!-- Account Actions / Danger Zone -->
+                    <div class="card" style="border-color: rgba(239, 68, 68, 0.2); padding: 1.5rem;">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--danger); text-align: left;">Danger Zone</h3>
+                        <button class="btn btn-block" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2);" onclick="handleLogout()">
+                            <i data-lucide="log-out"></i> Log Out
+                        </button>
+                    </div>
+                </div>
+            </section>
+
         </div>
         
         <!-- Mobile Bottom Navigation -->
@@ -462,6 +530,10 @@
                 <a href="#safetytips" class="bottom-nav-item" onclick="showSection('safetytips')">
                     <i data-lucide="book-open"></i>
                     <span>Tips</span>
+                </a>
+                <a href="#settings" class="bottom-nav-item" onclick="showSection('settings')">
+                    <i data-lucide="settings"></i>
+                    <span>Settings</span>
                 </a>
                 <button class="bottom-nav-item install-app-btn" type="button" onclick="installApp()" hidden>
                     <i data-lucide="download"></i>
