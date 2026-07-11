@@ -116,21 +116,21 @@
             </div>
             
             <div class="nav-links" id="navLinks">
-                <a href="#home" class="nav-item active" onclick="showSection('home')">Dashboard</a>
-                <a href="#location" class="nav-item" onclick="showSection('location')">Live Map</a>
-                <a href="#journey" class="nav-item" onclick="showSection('journey')">SafeTrip</a>
-                <a href="#contacts" class="nav-item" onclick="showSection('contacts')">Contacts</a>
-                <a href="#history" class="nav-item" onclick="showSection('history')">Activity</a>
-                <a href="#safetytips" class="nav-item" onclick="showSection('safetytips')">Safety Tips</a>
-                <a href="#howitworks" class="nav-item" onclick="showSection('howitworks')">Guide</a>
-                <a href="#settings" class="nav-item" onclick="showSection('settings')">Settings</a>
+                <a href="javascript:void(0)" class="nav-item active" onclick="showSection('home')">Dashboard</a>
+                <a href="javascript:void(0)" class="nav-item" onclick="showSection('location')">Live Map</a>
+                <a href="javascript:void(0)" class="nav-item" onclick="showSection('journey')">SafeTrip</a>
+                <a href="javascript:void(0)" class="nav-item" onclick="showSection('contacts')">Contacts</a>
+                <a href="javascript:void(0)" class="nav-item" onclick="showSection('history')">Activity</a>
+                <a href="javascript:void(0)" class="nav-item" onclick="showSection('safetytips')">Safety Tips</a>
+                <a href="javascript:void(0)" class="nav-item" onclick="showSection('howitworks')">Guide</a>
+                <a href="javascript:void(0)" class="nav-item" onclick="showSection('settings')">Profile</a>
             </div>
 
             <div class="nav-actions">
                 <button class="btn btn-secondary install-app-btn" type="button" onclick="installApp()" hidden>
                     <i data-lucide="download"></i> Install
                 </button>
-                <div class="profile-trigger" onclick="showSection('settings')" title="Settings & Profile">
+                <div class="profile-trigger" onclick="showSection('settings')" title="Profile">
                     <div class="profile-avatar" id="navAvatar"><i data-lucide="user" style="width: 16px; height: 16px;"></i></div>
                     <span id="userName" style="font-size: 0.85rem; font-weight: 600;">Profile</span>
                     <i data-lucide="settings" style="width: 16px; height: 16px; color: var(--text-secondary);"></i>
@@ -467,8 +467,8 @@
             <section id="settings">
                 <div style="margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                     <div>
-                        <h2>Settings & <span class="text-gradient">Profile</span></h2>
-                        <p class="text-muted">Manage your personal information and preferences.</p>
+                        <h2>Your <span class="text-gradient">Profile</span></h2>
+                        <p class="text-muted">Manage your personal information.</p>
                     </div>
                     <button class="btn btn-secondary" onclick="showSection('home')" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
                         <i data-lucide="arrow-left"></i> Back to Home
@@ -520,13 +520,7 @@
                         </div>
                     </div>
 
-                    <!-- Account Actions / Danger Zone -->
-                    <div class="card" style="border-color: rgba(239, 68, 68, 0.2); padding: 1.5rem;">
-                        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--danger); text-align: left;">Danger Zone</h3>
-                        <button class="btn btn-block" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2);" onclick="handleLogout()">
-                            <i data-lucide="log-out"></i> Log Out
-                        </button>
-                    </div>
+                    <!-- Account Actions / Danger Zone REMOVED -->
                 </div>
             </section>
 
@@ -540,25 +534,25 @@
                 </button>
             </div>
             <div class="bottom-nav">
-                <a href="#home" class="bottom-nav-item active" onclick="showSection('home')">
+                <a href="javascript:void(0)" class="bottom-nav-item active" onclick="showSection('home')">
                     <i data-lucide="home"></i>
                     <span>Home</span>
                 </a>
-                <a href="#journey" class="bottom-nav-item" onclick="showSection('journey')">
+                <a href="javascript:void(0)" class="bottom-nav-item" onclick="showSection('journey')">
                     <i data-lucide="route"></i>
                     <span>SafeTrip</span>
                 </a>
-                <a href="#contacts" class="bottom-nav-item" onclick="showSection('contacts')">
+                <a href="javascript:void(0)" class="bottom-nav-item" onclick="showSection('contacts')">
                     <i data-lucide="users"></i>
                     <span>Contacts</span>
                 </a>
-                <a href="#safetytips" class="bottom-nav-item" onclick="showSection('safetytips')">
+                <a href="javascript:void(0)" class="bottom-nav-item" onclick="showSection('safetytips')">
                     <i data-lucide="book-open"></i>
                     <span>Tips</span>
                 </a>
-                <a href="#settings" class="bottom-nav-item" onclick="showSection('settings')">
-                    <i data-lucide="settings"></i>
-                    <span>Settings</span>
+                <a href="javascript:void(0)" class="bottom-nav-item" onclick="showSection('settings')">
+                    <i data-lucide="user"></i>
+                    <span>Profile</span>
                 </a>
                 <button class="bottom-nav-item install-app-btn" type="button" onclick="installApp()" hidden>
                     <i data-lucide="download"></i>

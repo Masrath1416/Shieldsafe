@@ -725,7 +725,7 @@ section.active { display: block; }
     }
     
     .container {
-        padding: 5rem 1rem 120px; /* Space for bottom nav */
+        padding: 5rem 1rem 140px; /* Space for bottom nav and SOS button */
     }
     
     h1 { font-size: 2.5rem; }
@@ -744,7 +744,7 @@ section.active { display: block; }
         display: flex;
         position: absolute;
         left: 50%;
-        bottom: 68px;
+        bottom: 80px;
         width: 96px;
         height: 96px;
         transform: translateX(-50%);
@@ -756,6 +756,7 @@ section.active { display: block; }
     .bottom-nav {
         display: flex;
         justify-content: space-around;
+        align-items: center;
         background: rgba(2, 6, 23, 0.96);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);

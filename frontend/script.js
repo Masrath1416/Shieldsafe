@@ -29,6 +29,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 2000);
 });
 
+window.addEventListener('popstate', (event) => {
+    if (event.state && event.state.section) {
+        showSection(event.state.section, false);
+    } else {
+        const section = location.hash.replace('#', '') || 'home';
+        showSection(section, false);
+    }
+});
+
 window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
     deferredInstallPrompt = event;
@@ -125,10 +134,12 @@ function showApp() {
     document.getElementById("welcomeSection").style.display = "none";
     document.getElementById("authSection").style.display = "none";
     document.getElementById("appContent").style.display = "block";
-    showSection('home');
+    
+    const section = location.hash.replace('#', '') || 'home';
+    showSection(section);
 }
 
-function showSection(sectionId) {
+function showSection(sectionId, pushToHistory = true) {
     // Hide all sections
     const sections = document.querySelectorAll("section");
     sections.forEach(s => s.classList.remove("active"));
@@ -137,6 +148,10 @@ function showSection(sectionId) {
     const target = document.getElementById(sectionId);
     if (target) {
         target.classList.add("active");
+    }
+
+    if (pushToHistory) {
+        history.pushState({ section: sectionId }, "", "#" + sectionId);
     }
 
     // SPECIAL: Load history if history tab clicked
