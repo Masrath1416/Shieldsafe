@@ -31,11 +31,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 window.addEventListener('popstate', (event) => {
     if (event.state && event.state.section) {
-        showSection(event.state.section, false);
-    } else {
-        const section = location.hash.replace('#', '') || 'home';
-        showSection(section, false);
+        showSection(event.state.section);
     }
+});
+
+window.addEventListener('load', () => {
+    loadProfile();
+    const section = location.hash.replace('#', '') || 'home';
+    showSection(section);
 });
 
 window.addEventListener("beforeinstallprompt", (event) => {
@@ -135,22 +138,21 @@ function showApp() {
     document.getElementById("authSection").style.display = "none";
     document.getElementById("appContent").style.display = "block";
     
+    // The load listener now handles the initial route, but if showApp is called directly:
     const section = location.hash.replace('#', '') || 'home';
     showSection(section);
 }
 
-function showSection(sectionId, pushToHistory = true) {
+function showSection(sectionId) {
     // Hide all sections
-    const sections = document.querySelectorAll("section");
-    sections.forEach(s => s.classList.remove("active"));
-
+    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
     // Show target section
     const target = document.getElementById(sectionId);
     if (target) {
-        target.classList.add("active");
+        target.classList.add('active');
     }
 
-    if (pushToHistory) {
+    if (!history.state || history.state.section !== sectionId) {
         history.pushState({ section: sectionId }, "", "#" + sectionId);
     }
 
@@ -402,14 +404,14 @@ function addContact() {
 
     if (!name || !phone) return alert("Please fill all fields");
 
-    const contacts = JSON.parse(localStorage.getItem("emergencyContacts") || "[]");
+    const contacts = JSON.parse(localStorage.getItem("contacts")) || [];
     const newContact = {
         id: Date.now().toString(),
         name: name,
         phone: phone
     };
     contacts.push(newContact);
-    localStorage.setItem("emergencyContacts", JSON.stringify(contacts));
+    localStorage.setItem("contacts", JSON.stringify(contacts));
     
     alert("Contact added ✅");
     document.getElementById("contactName").value = "";
@@ -418,7 +420,7 @@ function addContact() {
 }
 
 function fetchContacts() {
-    const contacts = JSON.parse(localStorage.getItem("emergencyContacts") || "[]");
+    const contacts = JSON.parse(localStorage.getItem("contacts")) || [];
     renderContactList(contacts);
 }
 
@@ -427,28 +429,22 @@ function renderContactList(contacts) {
     if (!container) return;
 
     if (!contacts || contacts.length === 0) {
-        container.innerHTML = `
-            <div class="contacts-empty-state">
-                <div class="contacts-empty-icon">
-                    <i data-lucide="users"></i>
-                </div>
-                <h4 class="contacts-empty-title">No contacts yet</h4>
-                <p class="contacts-empty-text">Add trusted friends or family members above. They'll receive your SOS alerts with your live location.</p>
-            </div>`;
-        if (window.lucide) lucide.createIcons();
+        container.innerHTML = `<div style="text-align: center; padding: 2rem;">No contacts yet. Add trusted contacts.</div>`;
         return;
     }
 
     container.innerHTML = contacts.map(c => `
-        <div class="contact-card">
-            <div class="contact-card-left">
-                <div class="contact-avatar">${c.name.charAt(0).toUpperCase()}</div>
-                <div class="contact-info">
-                    <h4 class="contact-name">${c.name}</h4>
-                    <p class="contact-phone"><i data-lucide="phone" style="width:12px;height:12px;display:inline;vertical-align:middle;margin-right:4px;"></i>${c.phone}</p>
+        <div class="contact-card" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border: 1px solid var(--border-subtle); margin-bottom: 0.5rem; border-radius: 8px;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                    ${c.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                    <h4 style="margin: 0; font-weight: bold;">${c.name}</h4>
+                    <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">${c.phone}</p>
                 </div>
             </div>
-            <button class="contact-delete-btn" onclick="deleteContact('${c.id}')" aria-label="Delete ${c.name}">
+            <button onclick="deleteContact('${c.id}')" style="background: none; border: none; color: var(--danger); cursor: pointer;">
                 <i data-lucide="trash-2"></i>
             </button>
         </div>
@@ -459,163 +455,69 @@ function renderContactList(contacts) {
 function deleteContact(id) {
     if (!confirm("Are you sure you want to delete this contact?")) return;
 
-    let contacts = JSON.parse(localStorage.getItem("emergencyContacts") || "[]");
+    let contacts = JSON.parse(localStorage.getItem("contacts")) || [];
     contacts = contacts.filter(c => c.id !== id);
-    localStorage.setItem("emergencyContacts", JSON.stringify(contacts));
+    localStorage.setItem("contacts", JSON.stringify(contacts));
     fetchContacts();
 }
 
 // ================= SOS & LOCATION =================
-async function triggerSOS() {
-    console.log("=== [SOS] Button clicked ===");
+function triggerSOS() {
+    const contacts = JSON.parse(localStorage.getItem("contacts")) || [];
 
-    // ── Pre-flight checks ──────────────────────────────────────────────────
-    if (!navigator.onLine) {
-        alert("No internet connection. Cannot send SOS! ❌");
+    if (contacts.length === 0) {
+        alert("No contacts added!");
         return;
     }
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-        alert("You are not logged in. Please login to use SOS. ❌");
+    if (!navigator.geolocation) {
+        alert("Geolocation not supported. Cannot send location.");
         return;
     }
 
-    const storedContacts = JSON.parse(localStorage.getItem("emergencyContacts") || "[]");
-    if (storedContacts.length === 0) {
-        alert("No emergency contacts saved. Go to Contacts and add at least one contact first! ❌");
-        return;
-    }
-
-    console.log("[SOS] Contacts loaded:", storedContacts.length, "contacts");
-    showToast("Getting location...", "info");
-
-    // ── Disable both SOS buttons while sending ─────────────────────────────
+    // Disable buttons
     const sosBtns = ["sosTriggerDesktop", "sosTriggerFab"].map(id => document.getElementById(id)).filter(Boolean);
     sosBtns.forEach(btn => {
         btn.innerText = "Sending...";
-        btn.style.opacity = "0.7";
         btn.style.pointerEvents = "none";
     });
 
-    // ── Helper: fire the API call ──────────────────────────────────────────
-    async function fireSOSRequest(latitude, longitude) {
-        const payload = { latitude, longitude, contacts: storedContacts };
-        console.log("[SOS] Calling API:", `${BASE_URL}/api/sos/trigger`);
-        console.log("[SOS] Payload:", JSON.stringify(payload));
-        showToast("Sending alert...", "info");
+    navigator.geolocation.getCurrentPosition(position => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
 
-        const res = await fetch(`${BASE_URL}/api/sos/trigger`, {
+        fetch(`${BASE_URL}/api/sos`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
+                "Content-Type": "application/json"
             },
-            body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-        console.log("[SOS] Server response:", data);
-
-        if (!res.ok) {
-            throw new Error(data.message || `Server error ${res.status}`);
-        }
-
-        return data;
-    }
-
-    // ── Helper: show result toast ──────────────────────────────────────────
-    function showSOSResult(data) {
-        const dispatch = data.alertsDispatch || [];
-        if (dispatch.length === 0) {
-            alert("SOS triggered but no contacts were reached. ❌");
-            return;
-        }
-
-        const delivered = dispatch.filter(a => a.status === "DELIVERED");
-        const failed    = dispatch.filter(a => a.status !== "DELIVERED");
-
-        if (failed.length === 0) {
-            alert(`SMS sent successfully to all ${delivered.length} contact(s).`);
-        } else if (delivered.length === 0) {
-            alert(`❌ SOS API reached but all SMS failed.\nError: ${failed[0].status}`);
-        } else {
-            alert(`⚠️ SOS partially sent.\n✅ Delivered: ${delivered.length}\n❌ Failed: ${failed.length} — ${failed[0].status}`);
-        }
-    }
-
-    // ── Get GPS then fire ──────────────────────────────────────────────────
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            async (pos) => {
-                const { latitude, longitude } = pos.coords;
-                console.log("[SOS] GPS obtained:", latitude, longitude);
-
-                // Show modal immediately
-                showModal("sosModal");
-                playSiren();
-                const locEl = document.getElementById("alertLocation");
-                if (locEl) locEl.innerText = `📍 ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
-
-                try {
-                    const data = await fireSOSRequest(latitude, longitude);
-                    showSOSResult(data);
-                } catch (err) {
-                    console.error("[SOS] API error:", err);
-                    alert(`Failed to reach server: ${err.message} ❌`);
-                } finally {
-                    sosBtns.forEach(btn => {
-                        btn.innerText = "SOS";
-                        btn.style.opacity = "1";
-                        btn.style.pointerEvents = "auto";
-                    });
-                }
-            },
-            async (gpsErr) => {
-                // GPS denied — still send SOS without location
-                console.warn("[SOS] GPS denied:", gpsErr.message, "— sending without location");
-
-                showModal("sosModal");
-                playSiren();
-                const locEl = document.getElementById("alertLocation");
-                if (locEl) locEl.innerText = "📍 Location unavailable";
-
-                try {
-                    const data = await fireSOSRequest(null, null);
-                    showSOSResult(data);
-                } catch (err) {
-                    console.error("[SOS] API error (no GPS):", err);
-                    alert(`Failed to reach server: ${err.message} ❌`);
-                } finally {
-                    sosBtns.forEach(btn => {
-                        btn.innerText = "SOS";
-                        btn.style.opacity = "1";
-                        btn.style.pointerEvents = "auto";
-                    });
-                }
-            },
-            { timeout: 8000, enableHighAccuracy: true }
-        );
-    } else {
-        // Browser has no geolocation at all
-        console.warn("[SOS] Geolocation not supported — sending without location");
-        showModal("sosModal");
-        playSiren();
-
-        try {
-            const data = await fireSOSRequest(null, null);
-            showSOSResult(data);
-        } catch (err) {
-            console.error("[SOS] API error (no geolocation):", err);
-            alert(`Failed to reach server: ${err.message} ❌`);
-        } finally {
+            body: JSON.stringify({
+                contacts,
+                latitude,
+                longitude
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert("SOS Sent Successfully");
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Failed to send SOS");
+        })
+        .finally(() => {
             sosBtns.forEach(btn => {
                 btn.innerText = "SOS";
-                btn.style.opacity = "1";
                 btn.style.pointerEvents = "auto";
             });
-        }
-    }
+        });
+    }, err => {
+        alert("Failed to get location. Ensure GPS is on.");
+        sosBtns.forEach(btn => {
+            btn.innerText = "SOS";
+            btn.style.pointerEvents = "auto";
+        });
+    });
 }
 
 
@@ -875,18 +777,16 @@ window.alert = function(message) {
 // ================= SETTINGS & PROFILE LOGIC =================
 
 function loadProfile() {
-    const name = localStorage.getItem("userName") || "";
-    const phone = localStorage.getItem("userPhone") || "";
-    const photo = localStorage.getItem("userPhoto") || "";
+    document.getElementById("profileName").value =
+        localStorage.getItem("profileName") || "";
 
-    const nameInput = document.getElementById("profileName");
-    const phoneInput = document.getElementById("profilePhone");
+    document.getElementById("profilePhone").value =
+        localStorage.getItem("profilePhone") || "";
+
+    // Keep photo loading logic just in case
+    const photo = localStorage.getItem("userPhoto") || "";
     const imgEl = document.getElementById("profileImage");
     const placeholderEl = document.getElementById("profileImagePlaceholder");
-
-    if (nameInput) nameInput.value = name;
-    if (phoneInput) phoneInput.value = phone;
-
     if (imgEl && placeholderEl) {
         if (photo) {
             imgEl.src = photo;
@@ -896,18 +796,7 @@ function loadProfile() {
             imgEl.src = "";
             imgEl.style.display = "none";
             placeholderEl.style.display = "block";
-            placeholderEl.innerText = name ? name.charAt(0).toUpperCase() : "U";
-        }
-    }
-
-    // Refresh nav header avatar as well
-    const navAvatar = document.getElementById("navAvatar");
-    if (navAvatar) {
-        if (photo) {
-            navAvatar.innerHTML = `<img src="${photo}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
-        } else {
-            navAvatar.innerHTML = `<i data-lucide="user" style="width: 16px; height: 16px;"></i>`;
-            if (window.lucide) lucide.createIcons();
+            placeholderEl.innerText = localStorage.getItem("profileName") ? localStorage.getItem("profileName").charAt(0).toUpperCase() : "U";
         }
     }
 
@@ -915,22 +804,13 @@ function loadProfile() {
 }
 
 function saveProfile() {
-    const name = document.getElementById("profileName")?.value.trim();
-    const phone = document.getElementById("profilePhone")?.value.trim();
+    const name = document.getElementById("profileName").value;
+    const phone = document.getElementById("profilePhone").value;
 
-    if (!name) {
-        alert("Name cannot be empty ❌");
-        return;
-    }
+    localStorage.setItem("profileName", name);
+    localStorage.setItem("profilePhone", phone);
 
-    localStorage.setItem("userName", name);
-    localStorage.setItem("userPhone", phone);
-
-    const userNameEl = document.getElementById("userName");
-    if (userNameEl) userNameEl.innerText = name;
-
-    showToast("Profile saved successfully ✅", "success");
-    loadProfile();
+    alert("Profile Saved Successfully");
 }
 
 function triggerPhotoUpload() {
@@ -967,7 +847,7 @@ function renderSettingsContacts() {
     const container = document.getElementById("settingsContactsList");
     if (!container) return;
 
-    const contacts = JSON.parse(localStorage.getItem("emergencyContacts") || "[]");
+    const contacts = JSON.parse(localStorage.getItem("contacts")) || [];
 
     if (!contacts || contacts.length === 0) {
         container.innerHTML = `
