@@ -148,14 +148,10 @@ function showSection(sectionId) {
     // Hide all sections
     document.querySelectorAll('.section').forEach(section => {
         section.style.display = "none";
-        section.classList.remove('active');
     });
 
     const target = document.getElementById(sectionId);
-    if (target) {
-        target.style.display = "block";
-        target.classList.add('active');
-    }
+    if (target) target.style.display = "block";
 
     if (!history.state || history.state.section !== sectionId) {
         history.pushState({ section: sectionId }, "", "#" + sectionId);
@@ -492,7 +488,7 @@ function triggerSOS() {
         const longitude = position.coords.longitude;
 
         try {
-            const res = await fetch(`${BASE_URL}/api/sos/send`, {
+            const res = await fetch(`${BASE_URL}/api/sos/trigger`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -505,10 +501,11 @@ function triggerSOS() {
             });
 
             if (!res.ok) {
+                alert("❌ SOS failed");
                 throw new Error("SOS API failed: " + res.status);
             }
 
-            alert("🚨 SOS Triggered (SMS disabled)");
+            alert("🚨 SOS Triggered");
         } catch (err) {
             console.error(err);
             alert("Failed to send SOS");
@@ -714,7 +711,7 @@ const safetyTips = [
     { category: 'home', icon: 'share-2', color: '#3b82f6', title: 'Share Your Plans with Someone', tip: 'Tell a trusted family member or friend where you are going and when you expect to be back, especially at night.' },
     { category: 'travel', icon: 'car', color: '#10b981', title: 'Verify Ride Details Before Entering', tip: 'Always confirm the car number, driver name, and photo match the app before getting into any cab or ride-share.' },
     { category: 'travel', icon: 'map', color: '#10b981', title: 'Pre-plan Your Route', tip: 'Research your destination before you travel. Download offline maps so you can navigate without relying on mobile data.' },
-    { category: 'travel', icon: 'bag-check', color: '#10b981', title: 'Keep Valuables Hidden', tip: 'Use anti-theft bags and keep wallets and phones in inner pockets. Avoid displaying expensive items in public.' },
+    { category: 'travel', icon: 'shopping-bag', color: '#10b981', title: 'Keep Valuables Hidden', tip: 'Use anti-theft bags and keep wallets and phones in inner pockets. Avoid displaying expensive items in public.' },
     { category: 'travel', icon: 'hotel', color: '#10b981', title: 'Choose Safe Accommodation', tip: 'Research hotels or hostels in advance. Ask for a room above the ground floor for added security.' },
 ];
 
