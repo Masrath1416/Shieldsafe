@@ -1,6 +1,7 @@
 // ================= CONFIG =================
 //const BASE_URL = "https://womens-safety-backend-oz26.onrender.com"; // Production URL
-const BASE_URL = "https://shieldsafe-backend-production.up.railway.app";
+//const BASE_URL = "https://shieldsafe-backend-production.up.railway.app";
+const BASE_URL = "https://shieldsafe-1.onrender.com";
 //const BASE_URL = "http://127.0.0.1:5000";
 // ================= APP STATE =================
 let isSirenPlaying = false;
