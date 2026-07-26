@@ -146,10 +146,14 @@ function showApp() {
 
 function showSection(sectionId) {
     // Hide all sections
-    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-    // Show target section
+    document.querySelectorAll('.section').forEach(section => {
+        section.style.display = "none";
+        section.classList.remove('active');
+    });
+
     const target = document.getElementById(sectionId);
     if (target) {
+        target.style.display = "block";
         target.classList.add('active');
     }
 
@@ -483,35 +487,37 @@ function triggerSOS() {
         btn.style.pointerEvents = "none";
     });
 
-    navigator.geolocation.getCurrentPosition(position => {
+    navigator.geolocation.getCurrentPosition(async position => {
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
 
-        fetch(`${BASE_URL}/api/sos`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                contacts,
-                latitude,
-                longitude
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            alert("SOS Sent Successfully");
-        })
-        .catch(err => {
+        try {
+            const res = await fetch(`${BASE_URL}/api/sos/send`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    contacts,
+                    latitude,
+                    longitude
+                })
+            });
+
+            if (!res.ok) {
+                throw new Error("SOS API failed: " + res.status);
+            }
+
+            alert("🚨 SOS Triggered (SMS disabled)");
+        } catch (err) {
             console.error(err);
             alert("Failed to send SOS");
-        })
-        .finally(() => {
+        } finally {
             sosBtns.forEach(btn => {
                 btn.innerText = "SOS";
                 btn.style.pointerEvents = "auto";
             });
-        });
+        }
     }, err => {
         alert("Failed to get location. Ensure GPS is on.");
         sosBtns.forEach(btn => {

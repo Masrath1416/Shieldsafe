@@ -168,7 +168,7 @@ nav {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 7rem 2rem 3rem;
+    padding: 7rem 2rem 140px;
 }
 
 section {
@@ -725,7 +725,10 @@ section.active { display: block; }
     }
     
     .container {
-        padding: 5rem 1rem 140px; /* Space for bottom nav and SOS button */
+        padding-bottom: 140px; /* Space for bottom nav and SOS button */
+        padding-top: 5rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
     
     h1 { font-size: 2.5rem; }
